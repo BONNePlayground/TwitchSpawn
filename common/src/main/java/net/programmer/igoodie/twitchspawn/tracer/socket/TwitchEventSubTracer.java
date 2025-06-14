@@ -186,6 +186,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.raid":
                     this.handleRaid(streamer, event);
                     break;
+                case "channel.cheer":
+                    this.handleBits(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -410,6 +413,31 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleBits(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String cheererNickname = event.optString("user_name", "Anonymous");
+            int bitsAmount = event.getInt("bits");
+            String message = event.optString("message", "");
+            boolean isAnonymous = event.optBoolean("is_anonymous", false);
+
+            EventArguments eventArguments = new EventArguments("bits", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = isAnonymous ? "Anonymous" : cheererNickname;
+            eventArguments.message = message;
+            eventArguments.donationAmount = bitsAmount;
+            eventArguments.donationCurrency = "Bits";
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling bits", e);
+        }
+    }
+
+
     private void handleRaid(CredentialsConfig.Streamer streamer, JSONObject event)
     {
         try
@@ -504,6 +532,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to raids
         this.subscribeToRaids(streamer, sessionId, userId);
+
+        // Subscribe to raids
+        this.subscribeToBits(streamer, sessionId, userId);
     }
 
 
@@ -663,6 +694,32 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to gift subscriptions", e);
+        }
+    }
+
+
+    private void subscribeToBits(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.cheer");
+            subscription.put("version", "1");
+
+            JSONObject condition = new JSONObject();
+            condition.put("broadcaster_user_id", userId);
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to bits", e);
         }
     }
 
