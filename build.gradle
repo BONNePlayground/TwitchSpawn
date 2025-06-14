@@ -34,6 +34,10 @@ subprojects {
     dependencies {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.officialMojangMappings()
+
+        // External library you want to include
+        implementation "com.squareup.okhttp3:okhttp:${rootProject.okhttp_version}"
+        implementation "io.socket:socket.io-client:${rootProject.socket_version}"
     }
 
     java {

@@ -41,14 +41,14 @@ dependencies {
 
     modImplementation "dev.architectury:architectury-forge:$rootProject.architectury_api_version"
 
+    shadowBundle "com.squareup.okhttp3:okhttp:$rootProject.okhttp_version"
+    shadowBundle "io.socket:socket.io-client:$rootProject.socket_version"
+
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
-    implementation 'com.squareup.okhttp3:okhttp:3.8.1'
-    implementation 'io.socket:socket.io-client:1.0.2'
-
-    forgeRuntimeLibrary 'com.squareup.okhttp3:okhttp:3.8.1'
-    forgeRuntimeLibrary 'io.socket:socket.io-client:1.0.2'
+    forgeRuntimeLibrary "com.squareup.okhttp3:okhttp:$rootProject.okhttp_version"
+    forgeRuntimeLibrary "io.socket:socket.io-client:$rootProject.socket_version"
 }
 
 processResources {
@@ -62,6 +62,12 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+
+    // Relocate shaded libraries to avoid conflicts
+    relocate 'okhttp3', 'net.programmer.igoodie.twitchspawn.shaded.okhttp3'
+    relocate 'okio', 'net.programmer.igoodie.twitchspawn.shaded.okio'
+    relocate 'io.socket', 'net.programmer.igoodie.twitchspawn.shaded.socket'
+    relocate 'org.json', 'net.programmer.igoodie.twitchspawn.shaded.json'
 }
 
 remapJar {
