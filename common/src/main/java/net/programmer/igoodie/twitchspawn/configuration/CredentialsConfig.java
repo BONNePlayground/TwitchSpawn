@@ -156,7 +156,9 @@ public class CredentialsConfig {
                     || streamer.minecraftNick == null
                     || streamer.platform == null
                     || streamer.token == null
-                    || streamer.tokenChat == null) {
+                    || streamer.twitchClientId == null
+                    || streamer.twitchAccessToken == null
+                    || streamer.twitchRefreshToken == null) {
                 TwitchSpawn.LOGGER.info("Correcting {}: Streamer on index {} is missing some fields -> {}", path, i, element);
                 streamer = Streamer.from(streamer, new Streamer());
                 streamers.set(i, toConfig(converter, streamer));
@@ -198,7 +200,9 @@ public class CredentialsConfig {
             created.twitchNick = (other.twitchNick != null ? other : defaultStreamer).twitchNick;
             created.platform = (other.platform != null ? other : defaultStreamer).platform;
             created.token = (other.token != null ? other : defaultStreamer).token;
-            created.tokenChat = (other.tokenChat != null ? other : defaultStreamer).tokenChat;
+            created.twitchClientId = (other.twitchClientId != null ? other : defaultStreamer).twitchClientId;
+            created.twitchAccessToken = (other.twitchAccessToken != null ? other : defaultStreamer).twitchAccessToken;
+            created.twitchRefreshToken = (other.twitchRefreshToken != null ? other : defaultStreamer).twitchRefreshToken;
             return created;
         }
 
@@ -206,7 +210,10 @@ public class CredentialsConfig {
         public String twitchNick = "TWITCH_NICK";
         public Platform platform = Platform.STREAMLABS;
         public String token = "YOUR_TOKEN_HERE";
-        public String tokenChat = "YOUR_CHAT_TOKEN_HERE - Can be generated from https://twitchapps.com/tmi/";
+
+        public String twitchClientId = "YOUR_TWITCH_CLIENT_ID - https://twitchtokengenerator.com/";
+        public String twitchAccessToken = "YOUR_TWITCH_ACCESS_TOKEN - https://twitchtokengenerator.com/";
+        public String twitchRefreshToken = "YOUR_TWITCH_REFRESH_TOKEN - https://twitchtokengenerator.com/";
 
         public Streamer() {}
 
@@ -222,7 +229,9 @@ public class CredentialsConfig {
                     .append("twitchNick=").append(twitchNick).append(",")
                     .append("platform=").append(platform).append(",")
                     .append("token=").append(token != null ? token.replaceAll("\\w", "#") : null)
-                    .append("tokenChat=").append(tokenChat != null ? tokenChat.replaceAll("\\w", "#") : null)
+                    .append("twitchClientId=").append(twitchClientId != null ? twitchClientId.replaceAll("\\w", "#") : null)
+                    .append("twitchAccessToken=").append(twitchAccessToken != null ? twitchAccessToken.replaceAll("\\w", "#") : null)
+                    .append("twitchRefreshToken=").append(twitchRefreshToken != null ? twitchRefreshToken.replaceAll("\\w", "#") : null)
                     .append("}")
                     .toString();
         }

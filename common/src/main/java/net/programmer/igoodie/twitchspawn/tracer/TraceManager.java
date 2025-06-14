@@ -10,10 +10,9 @@ import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
 import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
-import net.programmer.igoodie.twitchspawn.tracer.chat.TwitchChatTracer;
 import net.programmer.igoodie.twitchspawn.tracer.socket.StreamElementsSocketTracer;
 import net.programmer.igoodie.twitchspawn.tracer.socket.StreamlabsSocketTracer;
-import net.programmer.igoodie.twitchspawn.tracer.socket.TwitchPubSubTracer;
+import net.programmer.igoodie.twitchspawn.tracer.socket.TwitchEventSubTracer;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 
@@ -56,10 +55,9 @@ public class TraceManager {
         IO.setDefaultOkHttpWebSocketFactory(okHttpClient);
         IO.setDefaultOkHttpCallFactory(okHttpClient);
 
-        // Start Websocket tracers
-        this.webSocketTracers.add(new TwitchPubSubTracer(this)); // TODO: Extract to a worker, not master
-        this.webSocketTracers.add(new TwitchChatTracer(this)); // TODO: Extract to a worker, not master
-        webSocketTracers.forEach(WebSocketTracer::start);
+        // Start Websocket tracers - Replace old Twitch tracers with new EventSub tracer
+        this.webSocketTracers.add(new TwitchEventSubTracer(this));
+        this.webSocketTracers.forEach(WebSocketTracer::start);
 
         TwitchSpawn.LOGGER.info("Connecting Streamers...");
 
@@ -101,7 +99,7 @@ public class TraceManager {
             for (ServerPlayer player : TwitchSpawn.SERVER.getPlayerList().getPlayers()) {
                 UUID uuid = player.getUUID();
                 TranslatableComponent successText = new TranslatableComponent("commands.twitchspawn.stop.success",
-                        source == null ? "Server" : source.getTextName(), reason);
+                    source == null ? "Server" : source.getTextName(), reason);
                 player.sendMessage(successText, uuid);
                 NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(false));
             }

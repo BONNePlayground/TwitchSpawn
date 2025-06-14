@@ -8,13 +8,9 @@ public enum Platform {
     STREAMELEMENTS(
             "StreamElements",
             "https://realtime.streamelements.com"),
-    TWITCH_PUBSUB(
+    TWITCH_EVENTSUB(
             "Twitch PubSub",
-            "wss://pubsub-edge.twitch.tv"
-    ),
-    TWITCH_CHAT_IRC(
-            "Twitch Chat IRC",
-            "wss://irc-ws.chat.twitch.tv:443"
+            "wss://eventsub.wss.twitch.tv/ws"
     );
 
     public static Platform withName(String name) {
