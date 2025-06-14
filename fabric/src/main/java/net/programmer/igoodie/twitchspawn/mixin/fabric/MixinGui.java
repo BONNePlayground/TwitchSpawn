@@ -24,40 +24,22 @@ import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 public class MixinGui
 {
     @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/gui/Gui;renderHotbar(FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+        target = "Lnet/minecraft/client/Minecraft;isDemo()Z"))
     private void preRenderHotbar(PoseStack poseStack, float f, CallbackInfo ci)
     {
+        // Change to text
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(
             poseStack,
-            "HOTBAR");
+            "TEXT");
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;renderHotbar(Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-    private void preRenderHotbarSpectator(PoseStack poseStack, float f, CallbackInfo ci)
-    {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(
-            poseStack,
-            "HOTBAR");
-    }
 
     @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/gui/Gui;renderHotbar(FLcom/mojang/blaze3d/vertex/PoseStack;)V",
-        shift = At.Shift.AFTER))
+        target = "Lnet/minecraft/client/gui/Gui;renderEffects(Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
     private void postRenderHotbar(PoseStack poseStack, float f, CallbackInfo ci)
     {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
             poseStack,
-            "HOTBAR");
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;renderHotbar(Lcom/mojang/blaze3d/vertex/PoseStack;)V",
-        shift = At.Shift.AFTER))
-    private void postRenderHotbarSpectator(PoseStack poseStack, float f, CallbackInfo ci)
-    {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
-            poseStack,
-            "HOTBAR");
+            "EXT");
     }
 }

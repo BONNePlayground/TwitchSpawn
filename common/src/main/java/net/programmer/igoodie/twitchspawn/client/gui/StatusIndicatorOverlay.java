@@ -30,10 +30,18 @@ public class StatusIndicatorOverlay {
 
 
     /**
+     * Render the gui
+     */
+    private static final TwitchSpawnClientGuiEvent.OverlayRenderPost POST_RENDER =
+        StatusIndicatorOverlay::onRenderGuiPost;
+
+
+    /**
      * Register rendering events.
      */
     public static void register() {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.register(POST_RENDER);
     }
 
 
@@ -42,6 +50,7 @@ public class StatusIndicatorOverlay {
      */
     public static void unregister() {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.unregister(POST_RENDER);
     }
 
 
