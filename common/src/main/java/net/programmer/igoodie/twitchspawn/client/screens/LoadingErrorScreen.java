@@ -176,8 +176,7 @@ public class LoadingErrorScreen extends Screen
                 }
 
                 this.addEntry(new LoadingMessageEntry(
-                    new TranslatableComponent(i18nMessage).withStyle(ChatFormatting.DARK_RED).
-                        append(new TextComponent(exception.getMessage()).withStyle(ChatFormatting.WHITE))));
+                    new TranslatableComponent(i18nMessage, exception.getMessage(), exception.getClass().toString())));
             });
         }
 
