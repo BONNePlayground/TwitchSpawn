@@ -8,13 +8,10 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
+import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 
 public class StatusIndicatorOverlay {
 
@@ -22,7 +19,31 @@ public class StatusIndicatorOverlay {
             new ResourceLocation(TwitchSpawn.MOD_ID, "textures/indicators.png");
 
     private static boolean running = false;
+
     private static boolean drew = false;
+
+    /**
+     * Render indicator
+     */
+    private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
+        (matrixStack, type) -> drew = false;
+
+
+    /**
+     * Register rendering events.
+     */
+    public static void register() {
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
+    }
+
+
+    /**
+     * Unregister rendering events.
+     */
+    public static void unregister() {
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
+    }
+
 
     public static void setRunning(boolean running) {
         StatusIndicatorOverlay.running = running;
@@ -37,26 +58,14 @@ public class StatusIndicatorOverlay {
         }
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END)
-            return;
-    }
 
-    @SubscribeEvent
-    public static void onRenderGuiPre(RenderGameOverlayEvent.Pre event) {
-        drew = false;
-    }
-
-    @SubscribeEvent
-    public static void onRenderGuiPost(RenderGameOverlayEvent.Post event) {
+    private static void onRenderGuiPost(PoseStack matrixStack, String type) {
         if (ConfigManager.PREFERENCES.indicatorDisplay == PreferencesConfig.IndicatorDisplay.DISABLED)
             return; // The display is disabled, stop here
 
         Minecraft minecraft = Minecraft.getInstance();
-        PoseStack matrixStack = event.getMatrixStack();
 
-        if (event.getType() != ElementType.TEXT)
+        if (!type.equals("TEXT"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here

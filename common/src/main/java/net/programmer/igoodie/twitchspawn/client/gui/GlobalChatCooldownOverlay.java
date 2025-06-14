@@ -6,12 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
+import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 import net.programmer.igoodie.twitchspawn.util.CooldownBucket;
 
 public class GlobalChatCooldownOverlay {
@@ -20,20 +18,47 @@ public class GlobalChatCooldownOverlay {
             new ResourceLocation(TwitchSpawn.MOD_ID, "textures/cooldown.png");
 
     private static long timestamp = -1;
+
     private static boolean drew = false;
+
+    /**
+     * Render indicator
+     */
+    private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
+        (matrixStack, type) -> drew = false;
+
+    /**
+     * Render the gui
+     */
+    private static final TwitchSpawnClientGuiEvent.OverlayRenderPost POST_RENDER =
+        GlobalChatCooldownOverlay::onRenderGuiPost;
+
+
+    /**
+     * Register rendering events.
+     */
+    public static void register() {
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.register(POST_RENDER);
+    }
+
+
+    /**
+     * Unregister rendering events.
+     */
+    public static void unregister() {
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.unregister(POST_RENDER);
+    }
+
 
     public static void setCooldownTimestamp(long timestamp) {
         GlobalChatCooldownOverlay.timestamp = timestamp;
     }
 
-    @SubscribeEvent
-    public static void onRenderGuiPre(RenderGameOverlayEvent.Pre event) {
-        drew = false;
-    }
 
-    @SubscribeEvent
-    public static void onRenderGuiPost(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != ElementType.TEXT)
+    public static void onRenderGuiPost(PoseStack matrixStack, String type) {
+        if (!type.equals("TEXT"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here
@@ -60,8 +85,6 @@ public class GlobalChatCooldownOverlay {
                 x = 10;
                 y = 5;
             }
-
-            PoseStack matrixStack = event.getMatrixStack();
 
             matrixStack.pushPose();
             matrixStack.scale(scale, scale, scale);

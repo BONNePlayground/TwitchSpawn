@@ -5,7 +5,6 @@ import io.socket.client.Socket;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
@@ -62,6 +61,8 @@ public class TraceManager {
         this.webSocketTracers.add(new TwitchChatTracer(this)); // TODO: Extract to a worker, not master
         webSocketTracers.forEach(WebSocketTracer::start);
 
+        TwitchSpawn.LOGGER.info("Connecting Streamers...");
+
         // Connect online players from credentials.toml
         for (CredentialsConfig.Streamer streamer : ConfigManager.CREDENTIALS.streamers) {
             if (TwitchSpawn.SERVER.getPlayerList().getPlayerByName(streamer.minecraftNick) != null) {
@@ -69,13 +70,13 @@ public class TraceManager {
             }
         }
 
+        TwitchSpawn.LOGGER.info("Notify Players...");
+
         for (ServerPlayer player : TwitchSpawn.SERVER.getPlayerList().getPlayers()) {
             UUID uuid = player.getUUID();
             TranslatableComponent successText = new TranslatableComponent("commands.twitchspawn.start.success");
             player.sendMessage(successText, uuid);
-            NetworkManager.CHANNEL.sendTo(new StatusChangedPacket(true),
-                    player.connection.connection,
-                    NetworkDirection.PLAY_TO_CLIENT);
+            NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(true));
         }
     }
 
@@ -102,9 +103,7 @@ public class TraceManager {
                 TranslatableComponent successText = new TranslatableComponent("commands.twitchspawn.stop.success",
                         source == null ? "Server" : source.getTextName(), reason);
                 player.sendMessage(successText, uuid);
-                NetworkManager.CHANNEL.sendTo(new StatusChangedPacket(false),
-                        player.connection.connection,
-                        NetworkDirection.PLAY_TO_CLIENT);
+                NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(false));
             }
         }
     }

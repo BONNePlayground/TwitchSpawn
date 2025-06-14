@@ -1,12 +1,18 @@
 package net.programmer.igoodie.twitchspawn.network.packet;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import net.programmer.igoodie.twitchspawn.client.gui.StatusIndicatorOverlay;
 
 import java.util.function.Supplier;
 
+import dev.architectury.networking.NetworkManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.programmer.igoodie.twitchspawn.client.gui.StatusIndicatorOverlay;
+
+
 public class StatusChangedPacket {
+
+    public StatusChangedPacket(boolean status) {
+        this.status = status;
+    }
 
     public static void encode(StatusChangedPacket packet, FriendlyByteBuf buffer) {
         buffer.writeBoolean(packet.status);
@@ -16,20 +22,12 @@ public class StatusChangedPacket {
         return new StatusChangedPacket(buffer.readBoolean());
     }
 
-    public static void handle(final StatusChangedPacket packet,
-                              Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            StatusIndicatorOverlay.setRunning(packet.status);
-        });
-        context.get().setPacketHandled(true);
+    public void handle(Supplier<NetworkManager.PacketContext> context) {
+        context.get().queue(() -> StatusIndicatorOverlay.setRunning(this.status));
     }
 
-    /* ---------------------------- */
-
-    private boolean status;
-
-    public StatusChangedPacket(boolean status) {
-        this.status = status;
-    }
-
+    /**
+     * True if the status is running, false if stopped.
+     */
+    private final boolean status;
 }

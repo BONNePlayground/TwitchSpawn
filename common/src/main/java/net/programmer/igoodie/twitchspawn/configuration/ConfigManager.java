@@ -1,15 +1,17 @@
 package net.programmer.igoodie.twitchspawn.configuration;
 
-import net.minecraftforge.fml.loading.FMLPaths;
+
+import java.io.File;
+
+
+import dev.architectury.platform.Platform;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.tslanguage.TSLRulesetCollection;
 
-import java.io.File;
-
 public class ConfigManager {
 
-    public static final String CONFIG_DIR_PATH = FMLPaths.CONFIGDIR.get().toString() + File.separator + "TwitchSpawn";
+    public static final String CONFIG_DIR_PATH = Platform.getConfigFolder().toString() + File.separator + "TwitchSpawn";
 
     public static CredentialsConfig CREDENTIALS;
     public static TSLRulesetCollection RULESET_COLLECTION;

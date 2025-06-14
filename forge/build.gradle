@@ -9,8 +9,8 @@ loom {
 //        convertAccessWideners = true
 //        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "twitchspawn-common.mixins.json"
         mixinConfig "twitchspawn.mixins.json"
+        mixinConfig "twitchspawn-forge.mixins.json"
     }
 }
 

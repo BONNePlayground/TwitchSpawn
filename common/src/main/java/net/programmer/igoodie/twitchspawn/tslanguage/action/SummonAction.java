@@ -69,7 +69,7 @@ public class SummonAction extends TSLAction {
     @Override
     protected void performAction(ServerPlayer player, EventArguments args) {
         String command = String.format("/summon %s %s %s %s %s",
-                entityType.getRegistryName(),
+                entityType.arch$registryName(),
                 rawCoordX,
                 rawCoordY,
                 rawCoordZ,

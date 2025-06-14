@@ -1,12 +1,18 @@
 package net.programmer.igoodie.twitchspawn.network.packet;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import net.programmer.igoodie.twitchspawn.client.gui.GlobalChatCooldownOverlay;
 
 import java.util.function.Supplier;
 
+import dev.architectury.networking.NetworkManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.programmer.igoodie.twitchspawn.client.gui.GlobalChatCooldownOverlay;
+
+
 public class GlobalChatCooldownPacket {
+
+    public GlobalChatCooldownPacket(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public static void encode(GlobalChatCooldownPacket packet, FriendlyByteBuf buffer) {
         buffer.writeLong(packet.timestamp);
@@ -16,20 +22,12 @@ public class GlobalChatCooldownPacket {
         return new GlobalChatCooldownPacket(buffer.readLong());
     }
 
-    public static void handle(final GlobalChatCooldownPacket packet,
-                              Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            GlobalChatCooldownOverlay.setCooldownTimestamp(packet.timestamp);
-        });
-        context.get().setPacketHandled(true);
+    public void handle(Supplier<NetworkManager.PacketContext> context) {
+        context.get().queue(() -> GlobalChatCooldownOverlay.setCooldownTimestamp(this.timestamp));
     }
 
-    /* -------------------------------- */
-
-    private long timestamp;
-
-    public GlobalChatCooldownPacket(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
+    /**
+     * Timestamp of the cooldown.
+     */
+    private final long timestamp;
 }
