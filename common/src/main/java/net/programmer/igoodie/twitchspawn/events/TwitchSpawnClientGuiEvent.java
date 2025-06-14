@@ -5,28 +5,44 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 
-@Environment(EnvType.CLIENT)
 public interface TwitchSpawnClientGuiEvent
 {
+    /**
+     * This event is fired before overlay is rendered.
+     */
     Event<OverlayRenderPre> OVERLAY_RENDER_PRE = EventFactory.createLoop();
 
+    /**
+     * This event is fired after overlay is rendered.
+     */
     Event<OverlayRenderPost> OVERLAY_RENDER_POST = EventFactory.createLoop();
 
+    /**
+     * This event is fired after loading screen is removed.
+     */
+    Event<LoadingScreenFinish> FINISH_LOADING_OVERLAY = EventFactory.createLoop();
 
-    @Environment(EnvType.CLIENT)
+
     interface OverlayRenderPre
     {
         void renderHud(PoseStack matrixStack, String type);
     }
 
 
-    @Environment(EnvType.CLIENT)
     interface OverlayRenderPost
     {
         void renderHud(PoseStack matrixStack, String type);
+    }
+
+    /**
+     * This event is fired when the debug text is rendered.
+     */
+    interface LoadingScreenFinish
+    {
+        void removeOverlay(Minecraft client, Screen screen);
     }
 }

@@ -1,0 +1,256 @@
+//
+// Created by BONNe
+// Copyright - 2023
+//
+
+
+package net.programmer.igoodie.twitchspawn.client.screens;
+
+
+import com.electronwill.nightconfig.core.io.ParsingException;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.io.File;
+import java.util.List;
+import java.util.Objects;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
+import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
+import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
+import net.programmer.igoodie.twitchspawn.tslanguage.parser.TSLSyntaxError;
+
+
+/**
+ * Very simplistic error screen for fabric.
+ */
+public class LoadingErrorScreen extends Screen
+{
+    /**
+     * Creates a new error screen with the given exceptions.
+     * @param configLoadingExceptions The exceptions to display.
+     */
+    public LoadingErrorScreen(List<Exception> configLoadingExceptions)
+    {
+        super(new TextComponent("Loading Error"));
+        this.configLoadingExceptions = configLoadingExceptions;
+    }
+
+
+    @Override
+    public void init()
+    {
+        super.init();
+        this.clearWidgets();
+
+        this.errorScreenTitle = new TranslatableComponent("modloader.twitchspawn.error.title").
+            withStyle(ChatFormatting.YELLOW);
+
+        this.addRenderableWidget(new Button(50, this.height - 46, this.width / 2 - 55, 20,
+                    new TranslatableComponent("modloader.twitchspawn.error.folder"),
+                onPress -> Util.getPlatform().openFile(new File(ConfigManager.CONFIG_DIR_PATH))));
+        this.addRenderableWidget(new Button(this.width / 2 - 55, 20, this.width / 2 + 5, this.height - 46,
+                new TranslatableComponent("modloader.twitchspawn.error.reload"),
+                onPress -> reloadConfigs()));
+        this.addRenderableWidget(new Button(this.width / 4, this.height - 24, this.width / 2, 20,
+            new TranslatableComponent("modloader.twitchspawn.error.continue"),
+                onPress -> this.minecraft.setScreen(null)));
+
+        this.entryList = new LoadingEntryList(this, this.configLoadingExceptions);
+        this.addWidget(this.entryList);
+        this.setFocused(this.entryList);
+    }
+
+
+    @Override
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick)
+    {
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        this.entryList.render(poseStack, mouseX, mouseY, partialTick);
+        drawMultiLineCenteredString(poseStack,
+            font,
+            errorScreenTitle,
+            this.width / 2,
+            10);
+    }
+
+
+    @Override
+    public void renderBackground(PoseStack poseStack)
+    {
+        fillGradient(poseStack, 0, 0, this.width, this.height, -12574688, -11530224);
+    }
+
+
+    /**
+     * This method reloads configs and repopulates list with new exceptions or close screen if everything
+     * is correct.
+     */
+    private void reloadConfigs()
+    {
+        try
+        {
+            ConfigManager.loadConfigs();
+            this.minecraft.setScreen(null);
+        }
+        catch (TwitchSpawnLoadingErrors e)
+        {
+            this.configLoadingExceptions.clear();
+            this.configLoadingExceptions.addAll(e.getExceptions());
+            this.init();
+        }
+    }
+
+
+    /**
+     * This method draws multiline centered string.
+     * @param poseStack GuiGraphics instance.
+     * @param font FontRenderer instance.
+     * @param component String to draw.
+     * @param x X coordinate.
+     * @param y Y coordinate.
+     */
+    private void drawMultiLineCenteredString(PoseStack poseStack, Font font, Component component, int x, int y)
+    {
+        for (FormattedCharSequence chars : font.split(component, this.width))
+        {
+            font.drawShadow(poseStack, formatToString(chars), (float) ((x - font.width(chars) / 2.0)), (float) y, 0xFFFFFF, true);
+            y += font.lineHeight;
+        }
+    }
+
+    public static String formatToString(FormattedCharSequence sequence) {
+        StringBuilder builder = new StringBuilder();
+        sequence.accept((index, style, codePoint) -> {
+            builder.appendCodePoint(codePoint);
+            return true;
+        });
+        return builder.toString();
+    }
+
+
+    /**
+     * This class contains and renders all error entries.
+     */
+    private static class LoadingEntryList extends ObjectSelectionList<LoadingEntryList.LoadingMessageEntry>
+    {
+        LoadingEntryList(final LoadingErrorScreen parent, final List<Exception> errors)
+        {
+            super(parent.minecraft,
+                parent.width,
+                parent.height,
+                35,
+                parent.height - 50,
+                errors.stream().mapToInt(warning ->
+                    parent.font.split(new TextComponent(warning.getMessage()), parent.width - 20).size()).
+                    max().
+                    orElse(0) * parent.minecraft.font.lineHeight + 8);
+
+            errors.forEach(exception -> {
+                String i18nMessage;
+
+                if (exception instanceof TSLSyntaxError)
+                {
+                    i18nMessage = "modloader.twitchspawn.error.tsl";
+                }
+                else if (exception instanceof ParsingException)
+                {
+                    i18nMessage = "modloader.twitchspawn.error.toml";
+                }
+                else if (exception instanceof JsonSyntaxException)
+                {
+                    i18nMessage = "modloader.twitchspawn.error.json";
+                }
+                else
+                {
+                    i18nMessage = "modloader.twitchspawn.error.unknown";
+                }
+
+                this.addEntry(new LoadingMessageEntry(
+                    new TranslatableComponent(i18nMessage).withStyle(ChatFormatting.DARK_RED).
+                        append(new TextComponent(exception.getMessage()).withStyle(ChatFormatting.WHITE))));
+            });
+        }
+
+
+        @Override
+        protected int getScrollbarPosition()
+        {
+            return this.width - 6;
+        }
+
+
+        @Override
+        public int getRowWidth()
+        {
+            return this.width;
+        }
+
+
+        public class LoadingMessageEntry extends ObjectSelectionList.Entry<LoadingMessageEntry>
+        {
+            private final Component message;
+
+            LoadingMessageEntry(final Component message)
+            {
+                this.message = Objects.requireNonNull(message);
+            }
+
+
+            @Override
+            public Component getNarration()
+            {
+                return new TranslatableComponent("narrator.select", message);
+            }
+
+
+            @Override
+            public void render(PoseStack poseStack,
+                int entryIdx,
+                int top,
+                int left,
+                final int entryWidth,
+                final int entryHeight,
+                final int mouseX,
+                final int mouseY,
+                final boolean p_194999_5_,
+                final float partialTick)
+            {
+                Font font = Minecraft.getInstance().font;
+                List<FormattedCharSequence> textList = font.split(message, LoadingEntryList.this.width - 20);
+                int y = top + 2;
+
+                for (FormattedCharSequence string : textList)
+                {
+                    font.drawShadow(poseStack, formatToString(string), (float) left + 5, (float) y, 0xFFFFFF, false);
+                    y += font.lineHeight;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * List of config exceptions
+     */
+    private final List<Exception> configLoadingExceptions;
+
+    /**
+     * The component that displays error entries.
+     */
+    private LoadingEntryList entryList;
+
+    /**
+     * The title of the error screen.
+     */
+    private Component errorScreenTitle;
+}

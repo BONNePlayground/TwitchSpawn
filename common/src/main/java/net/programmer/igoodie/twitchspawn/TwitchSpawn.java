@@ -3,9 +3,12 @@ package net.programmer.igoodie.twitchspawn;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.programmer.igoodie.twitchspawn.client.TwitchSpawnClient;
 import net.programmer.igoodie.twitchspawn.command.RulesetNameArgumentType;
 import net.programmer.igoodie.twitchspawn.command.StreamerArgumentType;
 import net.programmer.igoodie.twitchspawn.command.TwitchSpawnCommand;
@@ -13,8 +16,6 @@ import net.programmer.igoodie.twitchspawn.command.serializer.RulesetNameArgument
 import net.programmer.igoodie.twitchspawn.command.serializer.StreamerArgumentSerializer;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
-import net.programmer.igoodie.twitchspawn.events.TwitchSpawnCommonEvent;
-import net.programmer.igoodie.twitchspawn.events.TwitchSpawnEventHandler;
 import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
@@ -51,8 +52,6 @@ public class TwitchSpawn {
      */
     public static void init()
     {
-        TwitchSpawnEventHandler.init();
-
         CommandRegistrationEvent.EVENT.register(
             (dispatcher, selection) -> TwitchSpawnCommand.register(dispatcher));
 
@@ -119,9 +118,17 @@ public class TwitchSpawn {
             ConfigManager.loadConfigs();
             NetworkManager.initialize();
         }
-        catch (TwitchSpawnLoadingErrors e)
+        catch (TwitchSpawnLoadingErrors exception)
         {
-            TwitchSpawnCommonEvent.SETUP_EVENT.invoker().setupEvent(e);
+            EnvExecutor.runInEnv(Env.CLIENT, () -> () -> TwitchSpawnClient.notifyCrash(exception));
+            EnvExecutor.runInEnv(Env.SERVER, () -> () -> notifyCrash(exception));
         }
+    }
+
+
+    public static void notifyCrash(TwitchSpawnLoadingErrors errors)
+    {
+        LOGGER.warn("TwitchSpawn config contains errors:");
+        LOGGER.warn("\n" + errors.toString());
     }
 }
