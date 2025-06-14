@@ -115,8 +115,8 @@ public class TwitchSpawn {
             ArgumentTypes.register("twitchspawn:ruleset", RulesetNameArgumentType.class,
                 new RulesetNameArgumentSerializer());
 
-            ConfigManager.loadConfigs();
             NetworkManager.initialize();
+            ConfigManager.loadConfigs();
         }
         catch (TwitchSpawnLoadingErrors exception)
         {
