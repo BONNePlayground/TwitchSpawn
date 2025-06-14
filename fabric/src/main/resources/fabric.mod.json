@@ -8,7 +8,7 @@
   "contact": {
     "homepage": ""  },
   "license": "EPL-1.0",
-  "icon": "icon.png",
+  "icon": "pack.png",
   "environment": "*",
   "entrypoints": {
     "main": [
