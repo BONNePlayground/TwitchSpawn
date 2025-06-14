@@ -180,6 +180,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.subscription.message":
                     this.handleResubscription(streamer, event);
                     break;
+                case "channel.subscription.gift":
+                    this.handleGiftSubscription(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -369,6 +372,41 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleGiftSubscription(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String gifterName = event.optString("user_name", "Anonymous");
+            String recipientName = event.optString("recipient_user_name", "Unknown");
+            String tier = event.getString("tier"); // "1000", "2000", "3000"
+            int total = event.optInt("total", 1);
+            boolean isAnonymous = event.optBoolean("is_anonymous", false);
+
+            // Convert tier string to integer (1000 -> 1, 2000 -> 2, 3000 -> 3)
+            int subscriptionTier = Integer.parseInt(tier) / 1000;
+
+            String displayGifterName = isAnonymous ? "Anonymous" : gifterName;
+
+            TwitchSpawn.LOGGER.info("Gift subscription for {}: {} gifted {} sub(s) to {} (Tier {})",
+                streamer.twitchNick, displayGifterName, total, recipientName, subscriptionTier);
+
+            EventArguments eventArguments = new EventArguments("subMysteryGift", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = displayGifterName;
+            eventArguments.message = recipientName; // Store recipient name in message field
+            eventArguments.subscriptionTier = subscriptionTier;
+            eventArguments.subscriptionMonths = total; // Use total field for number of gifts
+            eventArguments.gifted = true;
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling gift subscription event", e);
+        }
+    }
+
+
     private void handleSessionReconnect(CredentialsConfig.Streamer streamer, WebSocket socket, JSONObject message)
     {
         try
@@ -434,6 +472,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to resubscriptions
         this.subscribeToResubscriptions(streamer, sessionId, userId);
+
+        // Subscribe to gift subscriptions
+        this.subscribeToGiftSubscriptions(streamer, sessionId, userId);
     }
 
 
@@ -567,6 +608,32 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to resubscriptions", e);
+        }
+    }
+
+
+    private void subscribeToGiftSubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.subscription.gift");
+            subscription.put("version", "1");
+
+            JSONObject condition = new JSONObject();
+            condition.put("broadcaster_user_id", userId);
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to gift subscriptions", e);
         }
     }
 
