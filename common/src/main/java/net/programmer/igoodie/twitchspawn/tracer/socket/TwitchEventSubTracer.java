@@ -177,6 +177,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.subscribe":
                     this.handleSubscription(streamer, event);
                     break;
+                case "channel.subscription.message":
+                    this.handleResubscription(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -333,6 +336,39 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleResubscription(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String subscriberName = event.getString("user_name");
+            String tier = event.getString("tier"); // "1000", "2000", "3000"
+            int cumulativeMonths = event.getInt("cumulative_months");
+            int streakMonths = event.optInt("streak_months", 0);
+            String resubMessage = event.optString("message", "");
+
+            // Convert tier string to integer (1000 -> 1, 2000 -> 2, 3000 -> 3)
+            int subscriptionTier = Integer.parseInt(tier) / 1000;
+
+            TwitchSpawn.LOGGER.info("Resubscription for {}: {} ({} months total, {} streak, Tier {})",
+                streamer.twitchNick, subscriberName, cumulativeMonths, streakMonths, subscriptionTier);
+
+            EventArguments eventArguments = new EventArguments("resub", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = subscriberName;
+            eventArguments.message = resubMessage;
+            eventArguments.subscriptionTier = subscriptionTier;
+            eventArguments.subscriptionMonths = cumulativeMonths;
+            eventArguments.gifted = false; // Resub messages are not for gift subs
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling resubscription event", e);
+        }
+    }
+
+
     private void handleSessionReconnect(CredentialsConfig.Streamer streamer, WebSocket socket, JSONObject message)
     {
         try
@@ -395,6 +431,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to subscriptions
         this.subscribeToSubscriptions(streamer, sessionId, userId);
+
+        // Subscribe to resubscriptions
+        this.subscribeToResubscriptions(streamer, sessionId, userId);
     }
 
 
@@ -502,6 +541,32 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to subscriptions", e);
+        }
+    }
+
+
+    private void subscribeToResubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.subscription.message");
+            subscription.put("version", "1");
+
+            JSONObject condition = new JSONObject();
+            condition.put("broadcaster_user_id", userId);
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to resubscriptions", e);
         }
     }
 
