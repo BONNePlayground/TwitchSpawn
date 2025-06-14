@@ -22,7 +22,7 @@ import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 /**
  * This mixin is used to trigger the {@link TwitchSpawnClientGuiEvent#FINISH_LOADING_OVERLAY} event.
  */
-@Mixin(value = LoadingOverlay.class, remap = false)
+@Mixin(value = LoadingOverlay.class)
 public class MixinLoadingOverlay
 {
     @Shadow

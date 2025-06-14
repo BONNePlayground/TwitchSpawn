@@ -40,6 +40,6 @@ public class MixinGui
     {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
             poseStack,
-            "EXT");
+            "TEXT");
     }
 }
