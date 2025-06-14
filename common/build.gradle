@@ -1,0 +1,19 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+    // Add JSON dependency
+    compileOnly "com.electronwill.night-config:core:3.6.4"
+    compileOnly "com.electronwill.night-config:toml:3.6.4"
+
+    implementation 'com.squareup.okhttp3:okhttp:3.8.1'
+    implementation 'io.socket:socket.io-client:1.0.2'
+}
