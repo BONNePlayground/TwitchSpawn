@@ -183,6 +183,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.subscription.gift":
                     this.handleGiftSubscription(streamer, event);
                     break;
+                case "channel.raid":
+                    this.handleRaid(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -407,6 +410,29 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleRaid(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String raiderNickname = event.getString("from_broadcaster_user_name");
+            int raiderCount = event.getInt("viewers");
+
+            EventArguments eventArguments = new EventArguments("raid", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = raiderNickname;
+            eventArguments.raiderCount = raiderCount;
+            eventArguments.viewerCount = raiderCount; // Same as raider count for raids
+            eventArguments.message = ""; // Raids don't have messages
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling raid", e);
+        }
+    }
+
+
     private void handleSessionReconnect(CredentialsConfig.Streamer streamer, WebSocket socket, JSONObject message)
     {
         try
@@ -475,6 +501,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to gift subscriptions
         this.subscribeToGiftSubscriptions(streamer, sessionId, userId);
+
+        // Subscribe to raids
+        this.subscribeToRaids(streamer, sessionId, userId);
     }
 
 
@@ -634,6 +663,32 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to gift subscriptions", e);
+        }
+    }
+
+
+    private void subscribeToRaids(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.raid");
+            subscription.put("version", "1");
+
+            JSONObject condition = new JSONObject();
+            condition.put("to_broadcaster_user_id", userId);
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to raids", e);
         }
     }
 
