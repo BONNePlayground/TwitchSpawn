@@ -225,8 +225,8 @@ public abstract class TSLAction implements TSLFlowNode {
 
         if (ConfigManager.PREFERENCES.messageDisplay == PreferencesConfig.MessageDisplay.TITLES) {
             // Form title and subtitle packets
-            ClientboundSetTitleTextPacket packet = new ClientboundSetTitleTextPacket(text);
-            ClientboundSetSubtitleTextPacket subtitlePacket = new ClientboundSetSubtitleTextPacket(subtext); // 20
+            ClientboundSetTitleTextPacket packet = new ClientboundSetTitleTextPacket(text != null ? text : new TextComponent(""));
+            ClientboundSetSubtitleTextPacket subtitlePacket = new ClientboundSetSubtitleTextPacket(subtext != null ? subtext : new TextComponent(""));
             ClientboundSetTitlesAnimationPacket timePacket = new ClientboundSetTitlesAnimationPacket(
                     (int) (ConfigManager.PREFERENCES.notificationDelay * 0.1f / 50), // 10
                     (int) (ConfigManager.PREFERENCES.notificationDelay * 0.7f / 50), // 70
