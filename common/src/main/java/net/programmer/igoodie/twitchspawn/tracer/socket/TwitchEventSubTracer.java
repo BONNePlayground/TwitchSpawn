@@ -171,6 +171,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.chat.message":
                     this.handleChatMessage(streamer, event);
                     break;
+                case "channel.follow":
+                    this.handleFollow(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -273,6 +276,29 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleFollow(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String followerName = event.getString("user_name");
+            String followedAt = event.optString("followed_at", "");
+
+            TwitchSpawn.LOGGER.info("New follower for {}: {}", streamer.twitchNick, followerName);
+
+            EventArguments eventArguments = new EventArguments("follow", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = followerName;
+            eventArguments.message = ""; // Follows don't have messages
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling follow event", e);
+        }
+    }
+
+
     private void handleSessionReconnect(CredentialsConfig.Streamer streamer, WebSocket socket, JSONObject message)
     {
         try
@@ -329,6 +355,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to chat messages
         this.subscribeToChatMessages(streamer, sessionId, userId);
+
+        // Subscribe to follows
+        this.subscribeToFollows(streamer, sessionId, userId);
     }
 
 
@@ -383,6 +412,33 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to chat messages", e);
+        }
+    }
+
+
+    private void subscribeToFollows(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.follow");
+            subscription.put("version", "2");
+
+            JSONObject condition = new JSONObject();
+            condition.put("broadcaster_user_id", userId);
+            condition.put("moderator_user_id", userId); // Required for follow events - using broadcaster as moderator
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to follows", e);
         }
     }
 
