@@ -174,6 +174,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 case "channel.follow":
                     this.handleFollow(streamer, event);
                     break;
+                case "channel.subscribe":
+                    this.handleSubscription(streamer, event);
+                    break;
                 default:
                     TwitchSpawn.LOGGER.debug("Unhandled subscription type: {}", subscriptionType);
             }
@@ -299,6 +302,37 @@ public class TwitchEventSubTracer extends WebSocketTracer
     }
 
 
+    private void handleSubscription(CredentialsConfig.Streamer streamer, JSONObject event)
+    {
+        try
+        {
+            String subscriberName = event.getString("user_name");
+            String tier = event.getString("tier"); // "1000", "2000", "3000"
+            boolean isGift = event.optBoolean("is_gift", false);
+
+            // Convert tier string to integer (1000 -> 1, 2000 -> 2, 3000 -> 3)
+            int subscriptionTier = Integer.parseInt(tier) / 1000;
+
+            TwitchSpawn.LOGGER.info("New subscription for {}: {} (Tier {}, Gift: {})",
+                streamer.twitchNick, subscriberName, subscriptionTier, isGift);
+
+            EventArguments eventArguments = new EventArguments("subscription", "twitch");
+            eventArguments.streamerNickname = streamer.minecraftNick;
+            eventArguments.actorNickname = subscriberName;
+            eventArguments.message = ""; // Subscriptions don't have messages
+            eventArguments.subscriptionTier = subscriptionTier;
+            eventArguments.gifted = isGift;
+            eventArguments.subscriptionMonths = 1; // New subscriptions are always 1 month
+
+            ConfigManager.RULESET_COLLECTION.handleEvent(eventArguments);
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error handling subscription event", e);
+        }
+    }
+
+
     private void handleSessionReconnect(CredentialsConfig.Streamer streamer, WebSocket socket, JSONObject message)
     {
         try
@@ -358,6 +392,9 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         // Subscribe to follows
         this.subscribeToFollows(streamer, sessionId, userId);
+
+        // Subscribe to subscriptions
+        this.subscribeToSubscriptions(streamer, sessionId, userId);
     }
 
 
@@ -439,6 +476,32 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error subscribing to follows", e);
+        }
+    }
+
+
+    private void subscribeToSubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
+    {
+        try
+        {
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "channel.subscribe");
+            subscription.put("version", "1");
+
+            JSONObject condition = new JSONObject();
+            condition.put("broadcaster_user_id", userId);
+            subscription.put("condition", condition);
+
+            JSONObject transport = new JSONObject();
+            transport.put("method", "websocket");
+            transport.put("session_id", sessionId);
+            subscription.put("transport", transport);
+
+            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
+        }
+        catch (JSONException e)
+        {
+            TwitchSpawn.LOGGER.error("Error subscribing to subscriptions", e);
         }
     }
 
