@@ -1,8 +1,6 @@
 package net.programmer.igoodie.twitchspawn.registries.forge;
 
 
-import com.mojang.brigadier.arguments.ArgumentType;
-
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -16,23 +14,28 @@ import net.programmer.igoodie.twitchspawn.command.TSLWordsArgumentType;
 
 public class TwitchSpawnArgumentTypesImpl
 {
+    /**
+     * Registry for argument types.
+     */
+    public static final net.minecraftforge.registries.DeferredRegister<ArgumentTypeInfo<?, ?>> REGISTRY =
+        DeferredRegister.create(ForgeRegistries.COMMAND_ARGUMENT_TYPES, TwitchSpawn.MOD_ID);
+
     public static void registerArgumentType()
     {
         // Do nothing. Forge is registred on startup.
     }
 
     static {
-
         // Argument type for ruleset names.
-        ArgumentTypeInfos.registerByClass(RulesetNameArgumentType.class,
-            SingletonArgumentInfo.contextFree(RulesetNameArgumentType::rulesetName));
+        REGISTRY.register("ruleset", () -> ArgumentTypeInfos.registerByClass(RulesetNameArgumentType.class,
+            SingletonArgumentInfo.contextFree(RulesetNameArgumentType::rulesetName)));
 
         // Argument type for streamer names.
-        ArgumentTypeInfos.registerByClass(StreamerArgumentType.class,
-            SingletonArgumentInfo.contextFree(StreamerArgumentType::streamerNick));
+        REGISTRY.register("streamer", () -> ArgumentTypeInfos.registerByClass(StreamerArgumentType.class,
+            SingletonArgumentInfo.contextFree(StreamerArgumentType::streamerNick)));
 
         // Argument type for TSL words.
-        ArgumentTypeInfos.registerByClass(TSLWordsArgumentType.class,
-            SingletonArgumentInfo.contextFree(TSLWordsArgumentType::tslWords));
+        REGISTRY.register("tslwords", () -> ArgumentTypeInfos.registerByClass(TSLWordsArgumentType.class,
+            SingletonArgumentInfo.contextFree(TSLWordsArgumentType::tslWords)));
     }
 }
