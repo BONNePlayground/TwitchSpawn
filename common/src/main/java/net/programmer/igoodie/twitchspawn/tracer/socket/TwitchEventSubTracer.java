@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -28,6 +29,11 @@ public class TwitchEventSubTracer extends WebSocketTracer
     // Streamer Nickname -> CooldownBucket for chat cooldowns
     private final Map<String, CooldownBucket> cooldownBuckets;
 
+    // Message deduplication - store message IDs
+    private final Map<String, Long> processedMessages;
+
+    private static final long CACHE_TIMEOUT = 120000;
+
     // Keep alive timer
     private Timer keepAliveTimer;
 
@@ -36,6 +42,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
     {
         super(Platform.TWITCH_EVENTSUB, manager);
         this.cooldownBuckets = new HashMap<>();
+        this.processedMessages = new ConcurrentHashMap<>();
     }
 
 
@@ -80,6 +87,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
         }
 
         this.cooldownBuckets.clear();
+        this.processedMessages.clear();
     }
 
 
@@ -96,6 +104,12 @@ public class TwitchEventSubTracer extends WebSocketTracer
         try
         {
             JSONObject message = new JSONObject(text);
+
+            // Check for duplicate messages
+            if (this.isDuplicateMessage(message))
+            {
+                return; // Skip processing duplicate
+            }
 
             JSONObject metadata = message.getJSONObject("metadata");
             String messageType = metadata.getString("message_type");
@@ -126,6 +140,35 @@ public class TwitchEventSubTracer extends WebSocketTracer
         catch (JSONException e)
         {
             TwitchSpawn.LOGGER.error("Error parsing EventSub message", e);
+        }
+    }
+
+
+    private boolean isDuplicateMessage(JSONObject message)
+    {
+        try
+        {
+            JSONObject metadata = message.getJSONObject("metadata");
+            String messageId = metadata.getString("message_id");
+            long currentTime = System.currentTimeMillis();
+
+            // Clean up old entries periodically
+            this.cleanupOldMessages(currentTime);
+
+            // Check if we've already processed this message
+            if (this.processedMessages.containsKey(messageId))
+            {
+                TwitchSpawn.LOGGER.debug("Duplicate message detected and skipped: {}", messageId);
+                return true;
+            }
+
+            // Store this message ID with current timestamp
+            this.processedMessages.put(messageId, currentTime);
+            return false;
+        }
+        catch (JSONException e)
+        {
+            return false;
         }
     }
 
@@ -879,5 +922,20 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 sockets.add(ws);
             }
         }, 5000);
+    }
+
+
+    private void cleanupOldMessages(long currentTime)
+    {
+        // Only cleanup every 3 minutes to avoid excessive processing
+        if (currentTime % 180000 < 1000)
+        {
+            this.processedMessages.entrySet().removeIf(entry ->
+                currentTime - entry.getValue() > CACHE_TIMEOUT
+            );
+
+            TwitchSpawn.LOGGER.debug("Cleaned up old message IDs. Current cache size: {}",
+                this.processedMessages.size());
+        }
     }
 }
