@@ -28,11 +28,11 @@ public class TwitchSpawnSoundEvent
      * Sound event for popping in.
      */
     public static final RegistrySupplier<SoundEvent> POP_IN = REGISTRY.register("pop_in",
-        () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(TwitchSpawn.MOD_ID)));
+        () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "pop_in")));
 
     /**
      * Sound event for popping out.
      */
     public static final RegistrySupplier<SoundEvent> POP_OUT = REGISTRY.register("pop_out",
-        () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(TwitchSpawn.MOD_ID)));
+        () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "pop_out")));
 }

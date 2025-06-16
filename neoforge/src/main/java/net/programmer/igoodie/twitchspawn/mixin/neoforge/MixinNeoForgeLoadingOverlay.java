@@ -19,7 +19,7 @@ import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 
 
-@Mixin(value = LoadingOverlay.class, remap = false)
+@Mixin(value = LoadingOverlay.class)
 public class MixinNeoForgeLoadingOverlay
 {
     @Shadow

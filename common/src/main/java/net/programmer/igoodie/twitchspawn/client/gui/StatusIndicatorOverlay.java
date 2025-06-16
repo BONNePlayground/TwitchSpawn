@@ -20,7 +20,7 @@ import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
 public class StatusIndicatorOverlay {
 
     private static final ResourceLocation indicatorIcons =
-            new ResourceLocation(TwitchSpawn.MOD_ID, "textures/indicators.png");
+        ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "textures/indicators.png");
 
     private static boolean running = false;
 

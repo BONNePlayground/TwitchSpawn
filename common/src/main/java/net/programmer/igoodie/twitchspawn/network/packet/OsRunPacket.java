@@ -39,7 +39,7 @@ public record OsRunPacket(OsRunAction.Shell shell, String script) implements Cus
 
 
     public static final Type<OsRunPacket> ID =
-        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "os_run_packet"));
+        new Type<>(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "os_run_packet"));
 
 
     private static final StreamCodec<ByteBuf, OsRunAction.Shell> SHELL_CODEC = StreamCodec.of(

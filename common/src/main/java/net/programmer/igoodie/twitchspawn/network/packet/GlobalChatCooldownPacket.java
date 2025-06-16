@@ -36,7 +36,7 @@ public record GlobalChatCooldownPacket(long timestamp) implements CustomPacketPa
 
 
     public static final Type<GlobalChatCooldownPacket> ID =
-        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "global_chat_cooldown_packet"));
+        new Type<>(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "global_chat_cooldown_packet"));
 
 
     public static final StreamCodec<RegistryFriendlyByteBuf, GlobalChatCooldownPacket> STREAM_CODEC = StreamCodec.composite(

@@ -16,7 +16,7 @@ import net.programmer.igoodie.twitchspawn.util.CooldownBucket;
 public class GlobalChatCooldownOverlay {
 
     private static final ResourceLocation cooldownGlyphs =
-            new ResourceLocation(TwitchSpawn.MOD_ID, "textures/cooldown.png");
+            ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "textures/cooldown.png");
 
     private static long timestamp = -1;
 

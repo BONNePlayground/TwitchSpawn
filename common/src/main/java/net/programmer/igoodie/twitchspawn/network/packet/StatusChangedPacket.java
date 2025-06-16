@@ -36,7 +36,7 @@ public record StatusChangedPacket(boolean status) implements CustomPacketPayload
 
 
     public static final Type<StatusChangedPacket> ID =
-        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "status_changed_packet"));
+        new Type<>(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "status_changed_packet"));
 
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StatusChangedPacket> STREAM_CODEC = StreamCodec.composite(

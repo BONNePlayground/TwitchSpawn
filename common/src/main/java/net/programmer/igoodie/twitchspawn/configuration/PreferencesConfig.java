@@ -3,6 +3,7 @@ package net.programmer.igoodie.twitchspawn.configuration;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import com.electronwill.nightconfig.toml.TomlParser;
 import com.google.common.io.Resources;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
@@ -12,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 public class PreferencesConfig {
 
@@ -37,31 +40,35 @@ public class PreferencesConfig {
                 FileUtils.writeStringToFile(file, defaultScript(), StandardCharsets.UTF_8);
             }
 
-            CommentedFileConfig config = CommentedFileConfig.builder(file).build();
+            CommentedConfig config = new TomlParser().parse(FileUtils.readFileToString(file, StandardCharsets.UTF_8));
             CommentedConfig defaultConfig = new TomlParser().parse(defaultScript());
 
-            config.load();
+            AtomicBoolean corrected = new AtomicBoolean(false);
 
             getSpecs().correct(config, (action, path, incorrectValue, correctedValue) -> {
                 TwitchSpawn.LOGGER.info("[preferences.toml] Corrected {} to {}", incorrectValue, correctedValue);
                 config.setComment(path, defaultConfig.getComment(path));
+                corrected.set(true);
             });
 
-//            config.save();
-            save(config); // Here to put new line delimiters between entries & keep default comments
+            if (corrected.get())
+            {
+                String formatted = TomlFormat.instance()
+                    .createWriter()
+                    .writeToString(config);
+                FileUtils.writeStringToFile(file, formatted, StandardCharsets.UTF_8);
+            }
 
             PreferencesConfig preferencesConfig = new PreferencesConfig();
-            preferencesConfig.indicatorDisplay = getEnum(config, "indicatorDisplay", IndicatorDisplay.class);
-            preferencesConfig.messageDisplay = getEnum(config, "messageDisplay", MessageDisplay.class);
+            preferencesConfig.indicatorDisplay = config.getEnum("indicatorDisplay", IndicatorDisplay.class);
+            preferencesConfig.messageDisplay = config.getEnum("messageDisplay", MessageDisplay.class);
             preferencesConfig.notificationVolume = config.get("notificationVolume");
             preferencesConfig.notificationPitch = config.get("notificationPitch");
             preferencesConfig.notificationDelay = config.getInt("notificationDelay");
-            preferencesConfig.autoStart = getEnum(config, "autoStart", AutoStartEnum.class);
+            preferencesConfig.autoStart = config.getEnum("autoStart", AutoStartEnum.class);
             preferencesConfig.chatGlobalCooldown = config.get("chatGlobalCooldown");
             preferencesConfig.chatIndividualCooldown = config.get("chatIndividualCooldown");
             preferencesConfig.chatWarnings = config.get("chatWarnings").equals("enabled");
-
-            config.close();
 
             return preferencesConfig;
 

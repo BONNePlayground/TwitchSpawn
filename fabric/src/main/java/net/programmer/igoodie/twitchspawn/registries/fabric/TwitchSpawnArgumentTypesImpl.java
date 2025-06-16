@@ -27,17 +27,17 @@ public class TwitchSpawnArgumentTypesImpl
     public static void registerArgumentType()
     {
         ArgumentTypeRegistry.registerArgumentType(
-            new ResourceLocation(TwitchSpawn.MOD_ID, "ruleset"),
+            ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "ruleset"),
             RulesetNameArgumentType.class,
             SingletonArgumentInfo.contextFree(RulesetNameArgumentType::rulesetName));
 
         ArgumentTypeRegistry.registerArgumentType(
-            new ResourceLocation(TwitchSpawn.MOD_ID, "streamer"),
+            ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "streamer"),
             StreamerArgumentType.class,
             SingletonArgumentInfo.contextFree(StreamerArgumentType::streamerNick));
 
         ArgumentTypeRegistry.registerArgumentType(
-            new ResourceLocation(TwitchSpawn.MOD_ID, "tslwords"),
+            ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "tslwords"),
             TSLWordsArgumentType.class,
             SingletonArgumentInfo.contextFree(TSLWordsArgumentType::tslWords));
     }

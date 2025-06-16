@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
@@ -24,7 +25,7 @@ import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 public class MixinGui
 {
     @Inject(method = "renderDemoOverlay", at = @At(value = "HEAD"))
-    private void preRenderHotbar(GuiGraphics guiGraphics, float f, CallbackInfo ci)
+    private void preRenderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci)
     {
         // Change to text
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(
@@ -34,7 +35,7 @@ public class MixinGui
 
 
     @Inject(method = "renderDemoOverlay", at = @At(value = "RETURN"))
-    private void postRenderHotbar(GuiGraphics guiGraphics, float f, CallbackInfo ci)
+    private void postRenderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci)
     {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
             guiGraphics,
