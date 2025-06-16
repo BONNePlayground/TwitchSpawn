@@ -1,9 +1,10 @@
 package net.programmer.igoodie.twitchspawn.client.gui;
 
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
@@ -25,7 +26,7 @@ public class GlobalChatCooldownOverlay {
      * Render indicator
      */
     private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
-        (matrixStack, type) -> drew = false;
+        (graphics, typr) -> drew = false;
 
     /**
      * Render the gui
@@ -57,7 +58,7 @@ public class GlobalChatCooldownOverlay {
     }
 
 
-    public static void onRenderGuiPost(PoseStack matrixStack, String type) {
+    public static void onRenderGuiPost(GuiGraphics graphics, String type) {
         if (!type.equals("debug_text"))
             return; // Render only on HOTBAR
 
@@ -86,21 +87,20 @@ public class GlobalChatCooldownOverlay {
                 y = 5;
             }
 
+            PoseStack matrixStack = graphics.pose();
             matrixStack.pushPose();
             matrixStack.scale(scale, scale, scale);
-            renderGlyph(matrixStack, String.format("%02d", minutes), x, (int) (y / scale));
-            renderGlyph(matrixStack, ":", x + 32, (int) (y / scale));
-            renderGlyph(matrixStack, String.format("%02d", seconds), (x + 10 + 2 * 18), (int) (y / scale));
-            renderGlyph(matrixStack, "i", (int) (x + 10 + 4.25f * 18), (int) ((y - 2) / scale));
+            renderGlyph(graphics, matrixStack, String.format("%02d", minutes), x, (int) (y / scale));
+            renderGlyph(graphics, matrixStack, ":", x + 32, (int) (y / scale));
+            renderGlyph(graphics, matrixStack, String.format("%02d", seconds), (x + 10 + 2 * 18), (int) (y / scale));
+            renderGlyph(graphics, matrixStack, "i", (int) (x + 10 + 4.25f * 18), (int) ((y - 2) / scale));
             matrixStack.popPose();
         }
 
         drew = true;
     }
 
-    public static void renderGlyph(PoseStack ms, String number, int x, int y) {
-        Minecraft minecraft = Minecraft.getInstance();
-
+    private static void renderGlyph(GuiGraphics guiGraphics, PoseStack ms, String number, int x, int y) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, cooldownGlyphs);
@@ -115,8 +115,7 @@ public class GlobalChatCooldownOverlay {
             int w = 28;
             int h = 25;
 
-            minecraft.gui.blit(
-                    ms,
+            guiGraphics.blit(cooldownGlyphs,
                     x, y,
                     ux, uy,
                     w, h
@@ -134,11 +133,10 @@ public class GlobalChatCooldownOverlay {
                 int w = 18;
                 int h = 18;
 
-                minecraft.gui.blit(
-                        ms,
-                        x + offset, y,
-                        ux, uy,
-                        w, h
+                guiGraphics.blit(cooldownGlyphs,
+                    x + offset, y,
+                    ux, uy,
+                    w, h
                 );
 
                 offset += w;
@@ -150,7 +148,6 @@ public class GlobalChatCooldownOverlay {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+        RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/widgets.png"));
     }
-
 }

@@ -1,11 +1,11 @@
 package net.programmer.igoodie.twitchspawn.client.gui;
 
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -30,8 +30,7 @@ public class StatusIndicatorOverlay {
      * Render indicator
      */
     private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
-        (matrixStack, type) -> drew = false;
-
+        (graphics, type) -> drew = false;
 
     /**
      * Render the gui
@@ -73,11 +72,9 @@ public class StatusIndicatorOverlay {
     }
 
 
-    private static void onRenderGuiPost(PoseStack matrixStack, String type) {
+    private static void onRenderGuiPost(GuiGraphics gui, String type) {
         if (ConfigManager.PREFERENCES.indicatorDisplay == PreferencesConfig.IndicatorDisplay.DISABLED)
             return; // The display is disabled, stop here
-
-        Minecraft minecraft = Minecraft.getInstance();
 
         if (!type.equals("debug_text"))
             return; // Render only on HOTBAR
@@ -91,7 +88,7 @@ public class StatusIndicatorOverlay {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, indicatorIcons);
 
-        matrixStack.pushPose();
+        gui.pose().pushPose();
 
         int x = 5, y = 5;
         int ux = -1, uy = -1;
@@ -109,15 +106,15 @@ public class StatusIndicatorOverlay {
             h = 12;
         }
 
-        matrixStack.scale(1f, 1f, 1f);
-        minecraft.gui.blit(matrixStack, x, y, ux, uy, w, h);
+        gui.pose().scale(1f, 1f, 1f);
+        gui.blit(indicatorIcons, x, y, ux, uy, w, h);
 
-        matrixStack.popPose();
+        gui.pose().popPose();
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.disableBlend();
-        RenderSystem.setShaderTexture(0, Gui.GUI_ICONS_LOCATION);
+        RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/widgets.png"));
 
         drew = true;
     }

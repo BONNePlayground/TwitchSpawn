@@ -9,7 +9,6 @@ package net.programmer.igoodie.twitchspawn.client.screens;
 
 import com.electronwill.nightconfig.core.io.ParsingException;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -79,11 +79,11 @@ public class LoadingErrorScreen extends Screen
 
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick)
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        super.render(poseStack, mouseX, mouseY, partialTick);
-        this.entryList.render(poseStack, mouseX, mouseY, partialTick);
-        drawMultiLineCenteredString(poseStack,
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.entryList.render(guiGraphics, mouseX, mouseY, partialTick);
+        drawMultiLineCenteredString(guiGraphics,
             font,
             errorScreenTitle,
             this.width / 2,
@@ -92,9 +92,9 @@ public class LoadingErrorScreen extends Screen
 
 
     @Override
-    public void renderBackground(PoseStack poseStack)
+    public void renderBackground(GuiGraphics guiGraphics)
     {
-        fillGradient(poseStack, 0, 0, this.width, this.height, -12574688, -11530224);
+        guiGraphics.fillGradient(0, 0, this.width, this.height, -12574688, -11530224);
     }
 
 
@@ -120,17 +120,17 @@ public class LoadingErrorScreen extends Screen
 
     /**
      * This method draws multiline centered string.
-     * @param poseStack GuiGraphics instance.
+     * @param guiGraphics GuiGraphics instance.
      * @param font FontRenderer instance.
      * @param component String to draw.
      * @param x X coordinate.
      * @param y Y coordinate.
      */
-    private void drawMultiLineCenteredString(PoseStack poseStack, Font font, Component component, int x, int y)
+    private void drawMultiLineCenteredString(GuiGraphics guiGraphics, Font font, Component component, int x, int y)
     {
         for (FormattedCharSequence chars : font.split(component, this.width))
         {
-            font.drawShadow(poseStack, formatToString(chars), (float) ((x - font.width(chars) / 2.0)), (float) y, 0xFFFFFF, true);
+            guiGraphics.drawString(font, chars, (int) ((x - font.width(chars) / 2.0)), y, 0xFFFFFF, true);
             y += font.lineHeight;
         }
     }
@@ -220,7 +220,7 @@ public class LoadingErrorScreen extends Screen
 
 
             @Override
-            public void render(PoseStack poseStack,
+            public void render(GuiGraphics guiGraphics,
                 int entryIdx,
                 int top,
                 int left,
@@ -232,12 +232,12 @@ public class LoadingErrorScreen extends Screen
                 final float partialTick)
             {
                 Font font = Minecraft.getInstance().font;
-                List<FormattedCharSequence> textList = font.split(message, LoadingEntryList.this.width - 20);
+                var strings = font.split(message, LoadingEntryList.this.width - 20);
                 int y = top + 2;
 
-                for (FormattedCharSequence string : textList)
+                for (var string : strings)
                 {
-                    font.drawShadow(poseStack, formatToString(string), (float) left + 5, (float) y, 0xFFFFFF, false);
+                    guiGraphics.drawString(font, string, left + 5, y, 0xFFFFFF, false);
                     y += font.lineHeight;
                 }
             }

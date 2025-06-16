@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion = "[44,)"
+loaderVersion = "[46,)"
 license="EPL-1.0"
 issueTrackerURL="https://github.com/iGoodie/TwitchSpawn/issues"
 
@@ -17,20 +17,20 @@ description='''
 [[dependencies.twitchspawn]]
     modId = "forge"
     mandatory = true
-    versionRange = "[44,)"
+    versionRange = "[46,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.twitchspawn]]
     modId = "minecraft"
     mandatory = true
-    versionRange = "[1.19.3,)"
+    versionRange = "[1.20,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.twitchspawn]]
     modId = "architectury"
     mandatory = true
-    versionRange = "[7.1.86,)"
+    versionRange = "[9.2.14,)"
     ordering = "AFTER"
     side = "BOTH"

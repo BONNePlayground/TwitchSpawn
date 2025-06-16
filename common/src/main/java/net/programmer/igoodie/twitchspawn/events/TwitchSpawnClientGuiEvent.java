@@ -1,11 +1,10 @@
 package net.programmer.igoodie.twitchspawn.events;
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 
 
@@ -29,13 +28,13 @@ public interface TwitchSpawnClientGuiEvent
 
     interface OverlayRenderPre
     {
-        void renderHud(PoseStack matrixStack, String type);
+        void renderHud(GuiGraphics guiGraphics, String type);
     }
 
 
     interface OverlayRenderPost
     {
-        void renderHud(PoseStack matrixStack, String type);
+        void renderHud(GuiGraphics guiGraphics, String type);
     }
 
     /**

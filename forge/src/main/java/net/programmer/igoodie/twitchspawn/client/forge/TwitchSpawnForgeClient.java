@@ -26,14 +26,14 @@ public class TwitchSpawnForgeClient
 
     public static void onRenderGuiOverlayPre(RenderGuiOverlayEvent.Pre event)
     {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(event.getPoseStack(),
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(event.getGuiGraphics(),
             event.getOverlay().id().getPath());
     }
 
 
     public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event)
     {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(event.getPoseStack(),
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(event.getGuiGraphics(),
             event.getOverlay().id().getPath());
     }
 }
