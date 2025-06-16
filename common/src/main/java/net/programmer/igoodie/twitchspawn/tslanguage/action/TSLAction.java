@@ -6,8 +6,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 
 import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -217,7 +217,7 @@ public abstract class TSLAction implements TSLFlowNode {
         SoundEvent soundLocation = SoundEvents.PLAYER_LEVELUP;
         SoundSource category = SoundSource.MASTER;
         Vec3 position = player.position();
-        ClientboundSoundPacket packetSound = new ClientboundSoundPacket(soundLocation,
+        ClientboundSoundPacket packetSound = new ClientboundSoundPacket(Holder.direct(soundLocation),
             category,
             position.x,
             position.y,
@@ -295,7 +295,7 @@ public abstract class TSLAction implements TSLFlowNode {
         try
         {
             Either<ItemParser.ItemResult, ItemParser.TagResult> itemResult =
-                ItemParser.parseForTesting(HolderLookup.forRegistry(Registry.ITEM), new StringReader(itemInput));
+                ItemParser.parseForTesting(BuiltInRegistries.ITEM.asLookup(), new StringReader(itemInput));
 
             if (itemResult.left().isPresent())
             {

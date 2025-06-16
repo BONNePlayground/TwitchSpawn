@@ -2,6 +2,8 @@ package net.programmer.igoodie.twitchspawn.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.player.LocalPlayer;
@@ -12,6 +14,8 @@ import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
 import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
+import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
+
 
 public class StatusIndicatorOverlay {
 
@@ -57,13 +61,14 @@ public class StatusIndicatorOverlay {
     public static void setRunning(boolean running) {
         StatusIndicatorOverlay.running = running;
 
-        String soundName = running ? "pop_in" : "pop_out";
+        RegistrySupplier<SoundEvent> soundName =
+            running ? TwitchSpawnSoundEvent.POP_IN : TwitchSpawnSoundEvent.POP_OUT;
 
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer self = minecraft.player;
 
         if (self != null) { // Here to hopefully fix an obscure Null Pointer (From UNKNOWN PENGUIN's log)
-            self.playSound(new SoundEvent(new ResourceLocation(TwitchSpawn.MOD_ID, soundName)), 1f, 1f);
+            self.playSound(SoundEvent.createVariableRangeEvent(soundName.getId()), 1f, 1f);
         }
     }
 

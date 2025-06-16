@@ -53,15 +53,24 @@ public class LoadingErrorScreen extends Screen
         this.errorScreenTitle = Component.translatable("modloader.twitchspawn.error.title").
             withStyle(ChatFormatting.YELLOW);
 
-        this.addRenderableWidget(new Button(50, this.height - 46, this.width / 2 - 55, 20,
+        this.addRenderableWidget(Button.builder(
             Component.translatable("modloader.twitchspawn.error.folder"),
-                onPress -> Util.getPlatform().openFile(new File(ConfigManager.CONFIG_DIR_PATH))));
-        this.addRenderableWidget(new Button(this.width / 2 - 55, 20, this.width / 2 + 5, this.height - 46,
-            Component.translatable("modloader.twitchspawn.error.reload"),
-                onPress -> reloadConfigs()));
-        this.addRenderableWidget(new Button(this.width / 4, this.height - 24, this.width / 2, 20,
+                onPress -> Util.getPlatform().openFile(new File(ConfigManager.CONFIG_DIR_PATH))).
+            size(this.width / 2 - 55, 20).
+            pos(50, this.height - 46).
+            build());
+        this.addRenderableWidget(Button.builder(
+                Component.translatable("modloader.twitchspawn.error.reload"),
+                onPress -> reloadConfigs()).
+            size(this.width / 2 - 55, 20).
+            pos(this.width / 2 + 5, this.height - 46).
+            build());
+        this.addRenderableWidget(Button.builder(
             Component.translatable("modloader.twitchspawn.error.continue"),
-                onPress -> this.minecraft.setScreen(null)));
+                onPress -> this.minecraft.setScreen(null)).
+            size(this.width / 2, 20).
+            pos(this.width / 4, this.height - 24).
+            build());
 
         this.entryList = new LoadingEntryList(this, this.configLoadingExceptions);
         this.addWidget(this.entryList);
