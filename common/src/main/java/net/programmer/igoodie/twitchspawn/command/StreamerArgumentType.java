@@ -23,7 +23,7 @@ public class StreamerArgumentType implements ArgumentType<String> {
     /* ---------------------------------------- */
 
 
-    private StreamerArgumentType() { }
+    public StreamerArgumentType() { }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {

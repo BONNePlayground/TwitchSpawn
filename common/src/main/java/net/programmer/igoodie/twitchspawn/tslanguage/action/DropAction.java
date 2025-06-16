@@ -3,6 +3,8 @@ package net.programmer.igoodie.twitchspawn.tslanguage.action;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.programmer.igoodie.twitchspawn.tslanguage.event.EventArguments;
@@ -43,7 +45,7 @@ public class DropAction extends TSLAction {
             EventArguments randomEvent = EventArguments.createRandom("RandomStreamer");
             String randomItem = ExpressionEvaluator.replaceExpressions(this.itemRaw,
                     expression -> ExpressionEvaluator.fromArgs(expression, randomEvent));
-            new ItemParser(new StringReader(randomItem), true).parse();
+            ItemParser.parseForTesting(HolderLookup.forRegistry(Registry.ITEM), new StringReader(randomItem));
 
         } catch (CommandSyntaxException e) {
             throw new TSLSyntaxError(e.getRawMessage().getString());
@@ -52,28 +54,13 @@ public class DropAction extends TSLAction {
 
     @Override
     protected void performAction(ServerPlayer player, EventArguments args) {
-        ItemStack itemStack = createItemStack(args);
+        ItemStack itemStack = this.createItemStack(this.replaceExpressions(this.itemRaw, args), this.itemAmount);
         player.drop(itemStack, false, false);
-    }
-
-    private ItemStack createItemStack(EventArguments args) {
-        try {
-            String input = replaceExpressions(itemRaw, args);
-
-            ItemParser itemParser = new ItemParser(new StringReader(input), true).parse();
-            ItemStack itemStack = new ItemStack(itemParser.getItem(), itemAmount);
-            itemStack.setTag(itemParser.getNbt());
-
-            return itemStack;
-
-        } catch (CommandSyntaxException e) {
-            throw new InternalError("Invalid item format occurred after validation... Something fishy here..");
-        }
     }
 
     @Override
     protected String subtitleEvaluator(String expression, EventArguments args) {
-        ItemStack itemStack = createItemStack(args);
+        ItemStack itemStack = this.createItemStack(this.replaceExpressions(this.itemRaw, args), this.itemAmount);
 
         if (expression.equals("itemName"))
             return itemStack.getItem().getName(itemStack).getString();

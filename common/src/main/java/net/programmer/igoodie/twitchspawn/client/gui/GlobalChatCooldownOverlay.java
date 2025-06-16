@@ -58,7 +58,7 @@ public class GlobalChatCooldownOverlay {
 
 
     public static void onRenderGuiPost(PoseStack matrixStack, String type) {
-        if (!type.equals("TEXT"))
+        if (!type.equals("debug_text"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here

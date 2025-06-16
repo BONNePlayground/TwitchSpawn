@@ -1,8 +1,15 @@
 package net.programmer.igoodie.twitchspawn.tslanguage.action;
 
 import com.google.gson.JsonArray;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
+
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
@@ -11,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
@@ -209,7 +217,14 @@ public abstract class TSLAction implements TSLFlowNode {
         SoundEvent soundLocation = SoundEvents.PLAYER_LEVELUP;
         SoundSource category = SoundSource.MASTER;
         Vec3 position = player.position();
-        ClientboundSoundPacket packetSound = new ClientboundSoundPacket(soundLocation, category, position.x, position.y, position.z, volume, pitch);
+        ClientboundSoundPacket packetSound = new ClientboundSoundPacket(soundLocation,
+            category,
+            position.x,
+            position.y,
+            position.z,
+            volume,
+            pitch,
+            0);
         player.connection.send(packetSound);
 
         if (ConfigManager.PREFERENCES.messageDisplay == PreferencesConfig.MessageDisplay.DISABLED)
@@ -227,8 +242,8 @@ public abstract class TSLAction implements TSLFlowNode {
 
         if (ConfigManager.PREFERENCES.messageDisplay == PreferencesConfig.MessageDisplay.TITLES) {
             // Form title and subtitle packets
-            ClientboundSetTitleTextPacket packet = new ClientboundSetTitleTextPacket(text != null ? text : new TextComponent(""));
-            ClientboundSetSubtitleTextPacket subtitlePacket = new ClientboundSetSubtitleTextPacket(subtext != null ? subtext : new TextComponent(""));
+            ClientboundSetTitleTextPacket packet = new ClientboundSetTitleTextPacket(text != null ? text : Component.empty());
+            ClientboundSetSubtitleTextPacket subtitlePacket = new ClientboundSetSubtitleTextPacket(subtext != null ? subtext : Component.empty());
             ClientboundSetTitlesAnimationPacket timePacket = new ClientboundSetTitlesAnimationPacket(
                     (int) (ConfigManager.PREFERENCES.notificationDelay * 0.1f / 50), // 10
                     (int) (ConfigManager.PREFERENCES.notificationDelay * 0.7f / 50), // 70
@@ -242,8 +257,8 @@ public abstract class TSLAction implements TSLFlowNode {
 
         if (ConfigManager.PREFERENCES.messageDisplay == PreferencesConfig.MessageDisplay.CHAT) {
             UUID uuid = player.getUUID();
-            if (text != null) player.sendMessage(MCPHelpers.merge(new TextComponent(">> "), text), uuid);
-            if (subtext != null) player.sendMessage(MCPHelpers.merge(new TextComponent(">> "), subtext), uuid);
+            if (text != null) player.sendSystemMessage(MCPHelpers.merge(Component.literal(">> "), text));
+            if (subtext != null) player.sendSystemMessage(MCPHelpers.merge(Component.literal(">> "), subtext));
         }
     }
 
@@ -267,5 +282,34 @@ public abstract class TSLAction implements TSLFlowNode {
         try { return Integer.parseInt(string); } catch (NumberFormatException e) {
             throw new TSLSyntaxError("Expected an integer, found instead -> %s", string);
         }
+    }
+
+    /**
+     * Creates an item stack from given item input and item amount.
+     * @param itemInput Item input.
+     * @param itemAmount Item amount.
+     * @return Created item stack.
+     */
+    protected ItemStack createItemStack(String itemInput, int itemAmount)
+    {
+        try
+        {
+            Either<ItemParser.ItemResult, ItemParser.TagResult> itemResult =
+                ItemParser.parseForTesting(HolderLookup.forRegistry(Registry.ITEM), new StringReader(itemInput));
+
+            if (itemResult.left().isPresent())
+            {
+                ItemStack itemStack = new ItemStack(itemResult.left().get().item(), itemAmount);
+                itemResult.ifRight(tagResult -> itemStack.setTag(tagResult.nbt()));
+
+                return itemStack;
+            }
+        }
+        catch (CommandSyntaxException e)
+        {
+            throw new InternalError("Invalid item format occurred after validation... Something fishy here..");
+        }
+
+        return ItemStack.EMPTY;
     }
 }

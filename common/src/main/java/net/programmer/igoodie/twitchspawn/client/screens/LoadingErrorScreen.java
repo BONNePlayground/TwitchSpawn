@@ -22,8 +22,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
@@ -41,7 +39,7 @@ public class LoadingErrorScreen extends Screen
      */
     public LoadingErrorScreen(List<Exception> configLoadingExceptions)
     {
-        super(new TextComponent("Loading Error"));
+        super(Component.literal("Loading Error"));
         this.configLoadingExceptions = configLoadingExceptions;
     }
 
@@ -52,17 +50,17 @@ public class LoadingErrorScreen extends Screen
         super.init();
         this.clearWidgets();
 
-        this.errorScreenTitle = new TranslatableComponent("modloader.twitchspawn.error.title").
+        this.errorScreenTitle = Component.translatable("modloader.twitchspawn.error.title").
             withStyle(ChatFormatting.YELLOW);
 
         this.addRenderableWidget(new Button(50, this.height - 46, this.width / 2 - 55, 20,
-                    new TranslatableComponent("modloader.twitchspawn.error.folder"),
+            Component.translatable("modloader.twitchspawn.error.folder"),
                 onPress -> Util.getPlatform().openFile(new File(ConfigManager.CONFIG_DIR_PATH))));
         this.addRenderableWidget(new Button(this.width / 2 - 55, 20, this.width / 2 + 5, this.height - 46,
-                new TranslatableComponent("modloader.twitchspawn.error.reload"),
+            Component.translatable("modloader.twitchspawn.error.reload"),
                 onPress -> reloadConfigs()));
         this.addRenderableWidget(new Button(this.width / 4, this.height - 24, this.width / 2, 20,
-            new TranslatableComponent("modloader.twitchspawn.error.continue"),
+            Component.translatable("modloader.twitchspawn.error.continue"),
                 onPress -> this.minecraft.setScreen(null)));
 
         this.entryList = new LoadingEntryList(this, this.configLoadingExceptions);
@@ -151,7 +149,7 @@ public class LoadingErrorScreen extends Screen
                 35,
                 parent.height - 50,
                 errors.stream().mapToInt(warning ->
-                    parent.font.split(new TextComponent(warning.getMessage()), parent.width - 20).size()).
+                    parent.font.split(Component.literal(warning.getMessage()), parent.width - 20).size()).
                     max().
                     orElse(0) * parent.minecraft.font.lineHeight + 8);
 
@@ -176,7 +174,7 @@ public class LoadingErrorScreen extends Screen
                 }
 
                 this.addEntry(new LoadingMessageEntry(
-                    new TranslatableComponent(i18nMessage, exception.getMessage(), exception.getClass().toString())));
+                    Component.translatable(i18nMessage, exception.getMessage(), exception.getClass().toString())));
             });
         }
 
@@ -208,7 +206,7 @@ public class LoadingErrorScreen extends Screen
             @Override
             public Component getNarration()
             {
-                return new TranslatableComponent("narrator.select", message);
+                return Component.translatable("narrator.select", message);
             }
 
 

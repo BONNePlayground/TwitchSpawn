@@ -22,11 +22,10 @@
     "twitchspawn-fabric.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.10",
-    "minecraft": "~1.18.2",
+    "fabricloader": ">=0.16.14",
+    "minecraft": "~1.19",
     "java": ">=17"
-  ,"architectury": ">=4.12.94"
-  ,"fabric-api": "*"
+  ,"architectury": ">=5.14.84"
   },
   "suggests": {
     "another-mod": "*"

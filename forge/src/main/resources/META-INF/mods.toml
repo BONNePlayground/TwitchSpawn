@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion = "[40,)"
+loaderVersion = "[41,)"
 license="EPL-1.0"
 issueTrackerURL="https://github.com/iGoodie/TwitchSpawn/issues"
 
@@ -7,7 +7,7 @@ issueTrackerURL="https://github.com/iGoodie/TwitchSpawn/issues"
 modId="twitchspawn"
 version = "${version}"
 displayName="TwitchSpawn"
-authors="iGoodie"
+authors="iGoodie, BONNe1704"
 logoFile="pack.png"
 description='''
     TwitchSpawn listens for live events related to your Twitch channel using various Socket APIs.
@@ -17,20 +17,20 @@ description='''
 [[dependencies.twitchspawn]]
     modId = "forge"
     mandatory = true
-    versionRange = "[40,)"
+    versionRange = "[41,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.twitchspawn]]
     modId = "minecraft"
     mandatory = true
-    versionRange = "[1.18.2,)"
+    versionRange = "[1.19,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.twitchspawn]]
     modId = "architectury"
     mandatory = true
-    versionRange = "[4.12.94,)"
+    versionRange = "[5.14.84,)"
     ordering = "AFTER"
     side = "BOTH"

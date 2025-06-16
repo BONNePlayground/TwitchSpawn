@@ -26,9 +26,11 @@ public class CommandArguments {
         return Commands.argument(name, IntegerArgumentType.integer(min, max));
     }
 
-    public static RequiredArgumentBuilder<CommandSourceStack, ItemInput> item(String name) {
-        return Commands.argument(name, ItemArgument.item());
-    }
+//    I just commented out, as it is not used. ItemArgument.item() requires CommandBuildContext that
+//    I do not know how to provide here.
+//    public static RequiredArgumentBuilder<CommandSourceStack, ItemInput> item(String name) {
+//        return Commands.argument(name, ItemArgument.item());
+//    }
 
     public static RequiredArgumentBuilder<CommandSourceStack, EntitySelector> player(String name) {
         return Commands.argument(name, EntityArgument.player());

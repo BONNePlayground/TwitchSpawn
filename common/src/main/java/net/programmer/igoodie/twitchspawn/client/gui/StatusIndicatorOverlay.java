@@ -74,7 +74,7 @@ public class StatusIndicatorOverlay {
 
         Minecraft minecraft = Minecraft.getInstance();
 
-        if (!type.equals("TEXT"))
+        if (!type.equals("debug_text"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here

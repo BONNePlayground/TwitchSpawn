@@ -30,7 +30,7 @@ public class MixinGui
         // Change to text
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(
             poseStack,
-            "TEXT");
+            "debug_text");
     }
 
 
@@ -40,6 +40,6 @@ public class MixinGui
     {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
             poseStack,
-            "TEXT");
+            "debug_text");
     }
 }

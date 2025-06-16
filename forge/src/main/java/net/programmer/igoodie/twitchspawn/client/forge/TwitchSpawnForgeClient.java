@@ -2,7 +2,7 @@ package net.programmer.igoodie.twitchspawn.client.forge;
 
 
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,16 +24,16 @@ public class TwitchSpawnForgeClient
     }
 
 
-    public static void onRenderGuiOverlayPre(RenderGameOverlayEvent.Pre event)
+    public static void onRenderGuiOverlayPre(RenderGuiOverlayEvent.Pre event)
     {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(event.getMatrixStack(),
-            event.getType().name());
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(event.getPoseStack(),
+            event.getOverlay().id().getPath());
     }
 
 
-    public static void onRenderGuiOverlayPost(RenderGameOverlayEvent.Post event)
+    public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event)
     {
-        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(event.getMatrixStack(),
-            event.getType().name());
+        TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(event.getPoseStack(),
+            event.getOverlay().id().getPath());
     }
 }

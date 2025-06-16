@@ -5,19 +5,15 @@ import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
-import net.minecraft.commands.synchronization.ArgumentTypes;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.programmer.igoodie.twitchspawn.client.TwitchSpawnClient;
-import net.programmer.igoodie.twitchspawn.command.RulesetNameArgumentType;
-import net.programmer.igoodie.twitchspawn.command.StreamerArgumentType;
 import net.programmer.igoodie.twitchspawn.command.TwitchSpawnCommand;
-import net.programmer.igoodie.twitchspawn.command.serializer.RulesetNameArgumentSerializer;
-import net.programmer.igoodie.twitchspawn.command.serializer.StreamerArgumentSerializer;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
 import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
+import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnArgumentTypes;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
 import net.programmer.igoodie.twitchspawn.tracer.TraceManager;
 
@@ -87,7 +83,7 @@ public class TwitchSpawn {
             String translationKey = TRACE_MANAGER.isRunning() ?
                 "commands.twitchspawn.status.on" : "commands.twitchspawn.status.off";
 
-            player.sendMessage(new TranslatableComponent(translationKey), player.getUUID());
+            player.sendSystemMessage(Component.translatable(translationKey));
 
             if (TRACE_MANAGER.isRunning())
             {
@@ -109,11 +105,7 @@ public class TwitchSpawn {
         try
         {
             TwitchSpawnSoundEvent.register();
-
-            ArgumentTypes.register("twitchspawn:streamer", StreamerArgumentType.class,
-                new StreamerArgumentSerializer());
-            ArgumentTypes.register("twitchspawn:ruleset", RulesetNameArgumentType.class,
-                new RulesetNameArgumentSerializer());
+            TwitchSpawnArgumentTypes.registerArgumentType();
 
             NetworkManager.initialize();
             ConfigManager.loadConfigs();

@@ -22,7 +22,7 @@ public class RulesetNameArgumentType implements ArgumentType<String> {
 
     /* ------------------------------ */
 
-    private RulesetNameArgumentType() { }
+    public RulesetNameArgumentType() { }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
