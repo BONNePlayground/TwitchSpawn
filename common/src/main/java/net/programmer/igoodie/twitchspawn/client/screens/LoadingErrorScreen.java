@@ -156,11 +156,7 @@ public class LoadingErrorScreen extends Screen
                 parent.width,
                 parent.height,
                 35,
-                parent.height - 50,
-                errors.stream().mapToInt(warning ->
-                    parent.font.split(Component.literal(warning.getMessage()), parent.width - 20).size()).
-                    max().
-                    orElse(0) * parent.minecraft.font.lineHeight + 8);
+                parent.height - 50);
 
             errors.forEach(exception -> {
                 String i18nMessage;

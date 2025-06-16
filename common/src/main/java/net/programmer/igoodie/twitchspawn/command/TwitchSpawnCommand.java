@@ -4,7 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.commands.CommandRuntimeException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -292,7 +293,7 @@ public class TwitchSpawnCommand {
             tslAction.process(eventArguments);
 
         } catch (TSLSyntaxError e) {
-            throw new CommandRuntimeException(Component.literal(e.getMessage()));
+            throw new SimpleCommandExceptionType(Component.literal(e.getMessage())).create();
         }
 
         return 1;
