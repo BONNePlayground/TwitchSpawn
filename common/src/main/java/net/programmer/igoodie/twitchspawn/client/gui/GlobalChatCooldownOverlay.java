@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
@@ -101,7 +101,6 @@ public class GlobalChatCooldownOverlay {
     }
 
     private static void renderGlyph(GuiGraphics guiGraphics, PoseStack ms, String number, int x, int y) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, cooldownGlyphs);
 
@@ -115,10 +114,13 @@ public class GlobalChatCooldownOverlay {
             int w = 28;
             int h = 25;
 
-            guiGraphics.blit(cooldownGlyphs,
+            guiGraphics.blit(
+                RenderType::guiTextured,
+                cooldownGlyphs,
                     x, y,
                     ux, uy,
-                    w, h
+                    w, h,
+                256, 256
             );
 
         } else {
@@ -133,10 +135,12 @@ public class GlobalChatCooldownOverlay {
                 int w = 18;
                 int h = 18;
 
-                guiGraphics.blit(cooldownGlyphs,
+                guiGraphics.blit(RenderType::guiTextured,
+                    cooldownGlyphs,
                     x + offset, y,
                     ux, uy,
-                    w, h
+                    w, h,
+                    256, 256
                 );
 
                 offset += w;
@@ -146,7 +150,6 @@ public class GlobalChatCooldownOverlay {
         RenderSystem.disableBlend();
         ms.popPose();
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

@@ -7,7 +7,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
@@ -85,7 +85,6 @@ public class StatusIndicatorOverlay {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, indicatorIcons);
 
         gui.pose().pushPose();
@@ -107,11 +106,10 @@ public class StatusIndicatorOverlay {
         }
 
         gui.pose().scale(1f, 1f, 1f);
-        gui.blit(indicatorIcons, x, y, ux, uy, w, h);
+        gui.blit(RenderType::guiTextured, indicatorIcons, x, y, ux, uy, w, h, 256, 256);
 
         gui.pose().popPose();
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.disableBlend();
 
