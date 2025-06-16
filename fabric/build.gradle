@@ -73,4 +73,7 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+
+    archiveBaseName.set("${rootProject.archives_name}-fabric-${rootProject.minecraft_version}")
+    archiveClassifier.set("")
 }
