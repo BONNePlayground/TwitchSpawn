@@ -22,6 +22,9 @@ public class StatusIndicatorOverlay {
     private static final ResourceLocation indicatorIcons =
             new ResourceLocation(TwitchSpawn.MOD_ID, "textures/indicators.png");
 
+    private static final ResourceLocation GUI_ICONS =
+        new ResourceLocation("textures/gui/icons.png");
+
     private static boolean running = false;
 
     private static boolean drew = false;
@@ -114,7 +117,7 @@ public class StatusIndicatorOverlay {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.disableBlend();
-        RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/widgets.png"));
+        RenderSystem.setShaderTexture(0, GUI_ICONS);
 
         drew = true;
     }
