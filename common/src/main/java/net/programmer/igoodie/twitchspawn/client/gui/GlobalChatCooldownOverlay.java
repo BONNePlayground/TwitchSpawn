@@ -18,9 +18,6 @@ public class GlobalChatCooldownOverlay {
     private static final ResourceLocation cooldownGlyphs =
             new ResourceLocation(TwitchSpawn.MOD_ID, "textures/cooldown.png");
 
-    private static final ResourceLocation GUI_ICONS =
-        new ResourceLocation("textures/gui/icons.png");
-
     private static long timestamp = -1;
 
     private static boolean drew = false;
@@ -151,6 +148,5 @@ public class GlobalChatCooldownOverlay {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI_ICONS);
     }
 }
