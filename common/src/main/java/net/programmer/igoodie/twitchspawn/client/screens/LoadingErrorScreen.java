@@ -185,13 +185,6 @@ public class LoadingErrorScreen extends Screen
 
 
         @Override
-        protected int getScrollbarPosition()
-        {
-            return this.width - 6;
-        }
-
-
-        @Override
         public int getRowWidth()
         {
             return this.width;

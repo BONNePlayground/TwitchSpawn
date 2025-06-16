@@ -24,14 +24,14 @@ description='''
 [[dependencies.twitchspawn]]
     modId = "minecraft"
     type = "required"
-    versionRange = "[1.21.2,)"
+    versionRange = "[1.21.4,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.twitchspawn]]
     modId = "architectury"
     type = "required"
-    versionRange = "[14.0.4,)"
+    versionRange = "[15.0.3,)"
     ordering = "AFTER"
     side = "BOTH"
 
