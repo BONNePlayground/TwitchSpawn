@@ -48,8 +48,8 @@ public class TwitchSpawn {
      */
     public static void init()
     {
-        CommandRegistrationEvent.EVENT.register(
-            (dispatcher, selection) -> TwitchSpawnCommand.register(dispatcher));
+        CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
+            TwitchSpawnCommand.register(dispatcher));
 
         // Trigger tracer on server start.
         LifecycleEvent.SERVER_BEFORE_START.register(server -> {

@@ -77,7 +77,7 @@ public class SummonAction extends TSLAction {
                 rawCoordZ,
                 replaceExpressions(rawNbt, args));
 
-        player.getServer().getCommands().performCommand(player.createCommandSourceStack()
+        player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack()
                 .withPermission(9999).withSuppressedOutput(), command);
     }
 
