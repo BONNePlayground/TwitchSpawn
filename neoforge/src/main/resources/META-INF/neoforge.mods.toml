@@ -1,0 +1,39 @@
+modLoader="javafml"
+loaderVersion = "[2,)"
+license="EPL-1.0"
+issueTrackerURL="https://github.com/iGoodie/TwitchSpawn/issues"
+
+[[mods]]
+modId="twitchspawn"
+version = "${version}"
+displayName="TwitchSpawn"
+authors="iGoodie, BONNe1704"
+logoFile="pack.png"
+description='''
+    TwitchSpawn listens for live events related to your Twitch channel using various Socket APIs.
+    Then it handles those events with the rules handcrafted by you!
+'''
+
+[[dependencies.twitchspawn]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "[20,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.twitchspawn]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "[1.20.6,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.twitchspawn]]
+    modId = "architectury"
+    type = "required"
+    versionRange = "[12.1.4,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[mixins]]
+    config = "twitchspawn-neoforge.mixins.json"

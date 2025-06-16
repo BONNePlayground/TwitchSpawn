@@ -1,8 +1,8 @@
 package net.programmer.igoodie.twitchspawn.eventqueue;
 
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
-import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
 import net.programmer.igoodie.twitchspawn.tslanguage.event.EventArguments;
 import net.programmer.igoodie.twitchspawn.tslanguage.event.TSLEvent;
@@ -135,7 +135,7 @@ public class EventQueue {
                         .getPlayerByName(args.streamerNickname);
 
                 if (playerEntity != null) {
-                    NetworkManager.CHANNEL.sendToPlayer(playerEntity,
+                    NetworkManager.sendToPlayer(playerEntity,
                         new GlobalChatCooldownPacket(cooldownBucket.getGlobalCooldownTimestamp()));
                 }
             }

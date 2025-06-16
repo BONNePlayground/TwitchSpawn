@@ -1,15 +1,18 @@
 package net.programmer.igoodie.twitchspawn.tslanguage.action;
 
+
 import com.google.gson.JsonArray;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.util.Either;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
@@ -30,10 +33,6 @@ import net.programmer.igoodie.twitchspawn.tslanguage.parser.TSLRuleTokenizer;
 import net.programmer.igoodie.twitchspawn.tslanguage.parser.TSLSyntaxError;
 import net.programmer.igoodie.twitchspawn.util.ExpressionEvaluator;
 import net.programmer.igoodie.twitchspawn.util.MCPHelpers;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
 
 public abstract class TSLAction implements TSLFlowNode {
 
@@ -294,13 +293,18 @@ public abstract class TSLAction implements TSLFlowNode {
     {
         try
         {
-            Either<ItemParser.ItemResult, ItemParser.TagResult> itemResult =
-                ItemParser.parseForTesting(BuiltInRegistries.ITEM.asLookup(), new StringReader(itemInput));
+            ItemParser.ItemResult itemResult =
+                new ItemParser(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)).
+                    parse(new StringReader(itemInput));
 
-            if (itemResult.left().isPresent())
+            if (itemResult.item().isBound())
             {
-                ItemStack itemStack = new ItemStack(itemResult.left().get().item(), itemAmount);
-                itemResult.ifRight(tagResult -> itemStack.setTag(tagResult.nbt()));
+                ItemStack itemStack = new ItemStack(itemResult.item(), itemAmount);
+
+                if (!itemResult.components().isEmpty())
+                {
+                    itemStack.applyComponents(itemResult.components());
+                }
 
                 return itemStack;
             }

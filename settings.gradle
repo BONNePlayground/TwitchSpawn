@@ -11,4 +11,4 @@ rootProject.name = 'twitchspawn'
 
 include 'common'
 include 'fabric'
-include 'forge'
+include 'neoforge'

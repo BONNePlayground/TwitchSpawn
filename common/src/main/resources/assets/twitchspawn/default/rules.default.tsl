@@ -17,7 +17,7 @@ EXECUTE %/gamerule keepInventory true%
  WITH amount >= 1000
 
 # Follow Rules
-DROP %diamond{display:{Name:"\"99.99\% Percent Real Diamond\""}}% 2
+DROP %diamond[custom_name='["",{"text":"99\% Of real Diamond","italic":false}]']% 2
  ON Twitch Follow
 
 # Host Rules

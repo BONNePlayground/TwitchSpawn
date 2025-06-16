@@ -1,11 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.programmer.igoodie.twitchspawn.mixin",
+  "package": "net.programmer.igoodie.twitchspawn.mixin.neoforge",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
+    "MixinNeoForgeLoadingOverlay"
   ],
   "injectors": {
     "defaultRequire": 1

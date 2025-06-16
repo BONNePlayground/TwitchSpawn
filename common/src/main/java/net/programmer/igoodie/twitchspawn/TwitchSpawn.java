@@ -3,6 +3,7 @@ package net.programmer.igoodie.twitchspawn;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import net.minecraft.network.chat.Component;
@@ -11,7 +12,8 @@ import net.programmer.igoodie.twitchspawn.client.TwitchSpawnClient;
 import net.programmer.igoodie.twitchspawn.command.TwitchSpawnCommand;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
-import net.programmer.igoodie.twitchspawn.network.NetworkManager;
+import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
+import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnArgumentTypes;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
@@ -77,6 +79,29 @@ public class TwitchSpawn {
             ConfigManager.RULESET_COLLECTION.clearQueue();
         });
 
+        try
+        {
+            TwitchSpawnSoundEvent.register();
+            TwitchSpawnArgumentTypes.registerArgumentType();
+
+            ConfigManager.loadConfigs();
+        }
+        catch (TwitchSpawnLoadingErrors exception)
+        {
+            EnvExecutor.runInEnv(Env.CLIENT, () -> () -> TwitchSpawnClient.notifyCrash(exception));
+            EnvExecutor.runInEnv(Env.SERVER, () -> () -> notifyCrash(exception));
+        }
+
+        EnvExecutor.runInEnv(Env.SERVER, () -> TwitchSpawn::initServer);
+    }
+
+
+    public static void initServer()
+    {
+        NetworkManager.registerS2CPayloadType(GlobalChatCooldownPacket.ID, GlobalChatCooldownPacket.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(OsRunPacket.ID, OsRunPacket.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(StatusChangedPacket.ID, StatusChangedPacket.STREAM_CODEC);
+
         // Do stuff on player joining the server.
         PlayerEvent.PLAYER_JOIN.register(player ->
         {
@@ -90,7 +115,7 @@ public class TwitchSpawn {
                 TRACE_MANAGER.connectStreamer(player.getName().getString());
             }
 
-            NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(TRACE_MANAGER.isRunning()));
+            NetworkManager.sendToPlayer(player, new StatusChangedPacket(TRACE_MANAGER.isRunning()));
         });
 
         // Do stuff on player leaving the server.
@@ -101,20 +126,6 @@ public class TwitchSpawn {
                 TRACE_MANAGER.disconnectStreamer(player.getName().getString());
             }
         });
-
-        try
-        {
-            TwitchSpawnSoundEvent.register();
-            TwitchSpawnArgumentTypes.registerArgumentType();
-
-            NetworkManager.initialize();
-            ConfigManager.loadConfigs();
-        }
-        catch (TwitchSpawnLoadingErrors exception)
-        {
-            EnvExecutor.runInEnv(Env.CLIENT, () -> () -> TwitchSpawnClient.notifyCrash(exception));
-            EnvExecutor.runInEnv(Env.SERVER, () -> () -> notifyCrash(exception));
-        }
     }
 
 

@@ -1,5 +1,6 @@
 package net.programmer.igoodie.twitchspawn.tracer;
 
+import dev.architectury.networking.NetworkManager;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import net.minecraft.commands.CommandSourceStack;
@@ -8,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
-import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
 import net.programmer.igoodie.twitchspawn.tracer.socket.StreamElementsSocketTracer;
 import net.programmer.igoodie.twitchspawn.tracer.socket.StreamlabsSocketTracer;
@@ -73,7 +73,7 @@ public class TraceManager {
         for (ServerPlayer player : TwitchSpawn.SERVER.getPlayerList().getPlayers()) {
             Component successText = Component.translatable("commands.twitchspawn.start.success");
             player.sendSystemMessage(successText);
-            NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(true));
+            NetworkManager.sendToPlayer(player, new StatusChangedPacket(true));
         }
     }
 
@@ -99,7 +99,7 @@ public class TraceManager {
                 Component successText = Component.translatable("commands.twitchspawn.stop.success",
                     source == null ? "Server" : source.getTextName(), reason);
                 player.sendSystemMessage(successText);
-                NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(false));
+                NetworkManager.sendToPlayer(player, new StatusChangedPacket(false));
             }
         }
     }

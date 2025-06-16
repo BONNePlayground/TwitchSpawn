@@ -76,7 +76,7 @@ public class StatusIndicatorOverlay {
         if (ConfigManager.PREFERENCES.indicatorDisplay == PreferencesConfig.IndicatorDisplay.DISABLED)
             return; // The display is disabled, stop here
 
-        if (!type.equals("debug_text"))
+        if (!type.equals("demo_overlay"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here

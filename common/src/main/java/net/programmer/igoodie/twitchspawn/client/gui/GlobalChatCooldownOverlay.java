@@ -59,7 +59,7 @@ public class GlobalChatCooldownOverlay {
 
 
     public static void onRenderGuiPost(GuiGraphics graphics, String type) {
-        if (!type.equals("debug_text"))
+        if (!type.equals("demo_overlay"))
             return; // Render only on HOTBAR
 
         // Already drew, stop here

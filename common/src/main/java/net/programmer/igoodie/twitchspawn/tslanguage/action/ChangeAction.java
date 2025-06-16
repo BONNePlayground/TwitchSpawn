@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -88,7 +89,8 @@ public class ChangeAction extends ItemSelectiveAction {
             String randomItem = ExpressionEvaluator.replaceExpressions(this.itemRaw,
                     expression -> ExpressionEvaluator.fromArgs(expression, randomEvent));
 
-            ItemParser.parseForTesting(BuiltInRegistries.ITEM.asLookup(), new StringReader(randomItem));
+            new ItemParser(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)).
+                parse(new StringReader(randomItem));
 
         } catch (CommandSyntaxException e) {
             throw new TSLSyntaxError(e.getRawMessage().getString());

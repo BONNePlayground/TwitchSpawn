@@ -162,7 +162,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 return true;
             }
 
-            // Store this message ID with current timestamp
+            // Store this message ID with current status
             this.processedMessages.put(messageId, currentTime);
             return false;
         }

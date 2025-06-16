@@ -1,44 +1,55 @@
 package net.programmer.igoodie.twitchspawn.network.packet;
 
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.NotNull;
 
 import dev.architectury.networking.NetworkManager;
-import net.minecraft.network.FriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.tslanguage.action.OsRunAction;
 
 
-public class OsRunPacket {
-
-    public OsRunPacket(OsRunAction.Shell shell, String script) {
-        this.shell = shell;
-        this.script = script;
-    }
-
-    public static void encode(OsRunPacket packet, FriendlyByteBuf buffer) {
-        buffer.writeInt(packet.shell.ordinal());
-        buffer.writeUtf(packet.script);
-    }
-
-    public static OsRunPacket decode(FriendlyByteBuf buffer) {
-        OsRunAction.Shell shell = OsRunAction.Shell.values()[buffer.readInt()];
-        String script = buffer.readUtf();
-
-        return new OsRunPacket(shell, script);
-    }
-
-    public void handle(Supplier<NetworkManager.PacketContext> context) {
-        context.get().queue(() -> OsRunAction.handleLocalScript(this.shell, this.script));
-    }
-
-
+public record OsRunPacket(OsRunAction.Shell shell, String script) implements CustomPacketPayload
+{
     /**
-     * Shell to run the script with.
+     * This method handles incoming packet on server.
+     * @param data The incoming packet.
+     * @param packetContext The packet context.
      */
-    private final OsRunAction.Shell shell;
+    public static void handle(OsRunPacket data, NetworkManager.PacketContext packetContext)
+    {
+        OsRunAction.Shell shell = data.shell();
+        String script = data.script();
 
-    /**
-     * Script to run.
-     */
-    private final String script;
+        packetContext.queue(() -> OsRunAction.handleLocalScript(shell, script));
+    }
+
+
+    @Override
+    @NotNull
+    public Type<? extends CustomPacketPayload> type()
+    {
+        return OsRunPacket.ID;
+    }
+
+
+    public static final Type<OsRunPacket> ID =
+        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "os_run_packet"));
+
+
+    private static final StreamCodec<ByteBuf, OsRunAction.Shell> SHELL_CODEC = StreamCodec.of(
+        (buf, shell) -> buf.writeInt(shell.ordinal()),
+        buf -> OsRunAction.Shell.values()[buf.readInt()]
+    );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, OsRunPacket> STREAM_CODEC = StreamCodec.composite(
+        SHELL_CODEC, OsRunPacket::shell,
+        ByteBufCodecs.STRING_UTF8, OsRunPacket::script,
+        OsRunPacket::new
+    );
 }

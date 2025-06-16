@@ -3,6 +3,7 @@ package net.programmer.igoodie.twitchspawn.tslanguage.action;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +45,9 @@ public class DropAction extends TSLAction {
             EventArguments randomEvent = EventArguments.createRandom("RandomStreamer");
             String randomItem = ExpressionEvaluator.replaceExpressions(this.itemRaw,
                     expression -> ExpressionEvaluator.fromArgs(expression, randomEvent));
-            ItemParser.parseForTesting(BuiltInRegistries.ITEM.asLookup(), new StringReader(randomItem));
+
+            new ItemParser(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)).
+                parse(new StringReader(randomItem));
 
         } catch (CommandSyntaxException e) {
             throw new TSLSyntaxError(e.getRawMessage().getString());

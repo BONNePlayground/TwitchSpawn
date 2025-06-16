@@ -23,23 +23,21 @@ import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 @Mixin(value = Gui.class)
 public class MixinGui
 {
-    @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/Minecraft;isDemo()Z"))
+    @Inject(method = "renderDemoOverlay", at = @At(value = "HEAD"))
     private void preRenderHotbar(GuiGraphics guiGraphics, float f, CallbackInfo ci)
     {
         // Change to text
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.invoker().renderHud(
             guiGraphics,
-            "debug_text");
+            "demo_overlay");
     }
 
 
-    @Inject(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/gui/Gui;renderEffects(Lnet/minecraft/client/gui/GuiGraphics;)V"))
+    @Inject(method = "renderDemoOverlay", at = @At(value = "RETURN"))
     private void postRenderHotbar(GuiGraphics guiGraphics, float f, CallbackInfo ci)
     {
         TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.invoker().renderHud(
             guiGraphics,
-            "debug_text");
+            "demo_overlay");
     }
 }
