@@ -56,7 +56,7 @@ public class LoadingErrorScreen extends Screen
         this.addRenderableWidget(new Button(50, this.height - 46, this.width / 2 - 55, 20,
             Component.translatable("modloader.twitchspawn.error.folder"),
                 onPress -> Util.getPlatform().openFile(new File(ConfigManager.CONFIG_DIR_PATH))));
-        this.addRenderableWidget(new Button(this.width / 2 - 55, 20, this.width / 2 + 5, this.height - 46,
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 46, this.width / 2 - 55, 20,
             Component.translatable("modloader.twitchspawn.error.reload"),
                 onPress -> reloadConfigs()));
         this.addRenderableWidget(new Button(this.width / 4, this.height - 24, this.width / 2, 20,
@@ -72,13 +72,13 @@ public class LoadingErrorScreen extends Screen
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick)
     {
-        super.render(poseStack, mouseX, mouseY, partialTick);
         this.entryList.render(poseStack, mouseX, mouseY, partialTick);
         drawMultiLineCenteredString(poseStack,
             font,
             errorScreenTitle,
             this.width / 2,
             10);
+        super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
 
