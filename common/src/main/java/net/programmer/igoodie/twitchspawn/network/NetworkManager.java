@@ -7,6 +7,7 @@ import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
+import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 
 
 public class NetworkManager {
@@ -35,5 +36,10 @@ public class NetworkManager {
             GlobalChatCooldownPacket::encode,
             GlobalChatCooldownPacket::decode,
             GlobalChatCooldownPacket::handle);
+
+        CHANNEL.register(SyncStreamerDataPacket.class,
+            SyncStreamerDataPacket::encode,
+            SyncStreamerDataPacket::decode,
+            SyncStreamerDataPacket::handle);
     }
 }
