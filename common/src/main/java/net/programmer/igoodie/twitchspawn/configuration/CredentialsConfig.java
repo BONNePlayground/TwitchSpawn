@@ -58,6 +58,9 @@ public class CredentialsConfig {
 
             // TODO: Throw exception on duplicated Streamer (Checked on minecraftNick)
 
+            credentials.rawConfig = parsedConfig;
+            credentials.configFile = file;
+
             return credentials;
 
         } catch (IOException e) {
@@ -152,11 +155,10 @@ public class CredentialsConfig {
             }
 
             // Element is missing at least one field
-            if (streamer.twitchNick == null
-                    || streamer.minecraftNick == null
+            if (streamer.minecraftNick == null
                     || streamer.platform == null
                     || streamer.token == null
-                    || streamer.twitchClientId == null
+                    || streamer.twitchScopes == null
                     || streamer.twitchAccessToken == null
                     || streamer.twitchRefreshToken == null) {
                 TwitchSpawn.LOGGER.info("Correcting {}: Streamer on index {} is missing some fields -> {}", path, i, element);
@@ -197,39 +199,35 @@ public class CredentialsConfig {
         public static Streamer from(Streamer other, Streamer defaultStreamer) {
             Streamer created = new Streamer();
             created.minecraftNick = (other.minecraftNick != null ? other : defaultStreamer).minecraftNick;
-            created.twitchNick = (other.twitchNick != null ? other : defaultStreamer).twitchNick;
             created.platform = (other.platform != null ? other : defaultStreamer).platform;
             created.token = (other.token != null ? other : defaultStreamer).token;
-            created.twitchClientId = (other.twitchClientId != null ? other : defaultStreamer).twitchClientId;
+            created.twitchScopes = (other.twitchScopes != null ? other : defaultStreamer).twitchScopes;
             created.twitchAccessToken = (other.twitchAccessToken != null ? other : defaultStreamer).twitchAccessToken;
             created.twitchRefreshToken = (other.twitchRefreshToken != null ? other : defaultStreamer).twitchRefreshToken;
             return created;
         }
 
         public String minecraftNick = "MC_NICK";
-        public String twitchNick = "TWITCH_NICK";
         public Platform platform = Platform.STREAMLABS;
         public String token = "YOUR_TOKEN_HERE";
 
-        public String twitchClientId = "YOUR_TWITCH_CLIENT_ID - https://twitchtokengenerator.com/";
-        public String twitchAccessToken = "YOUR_TWITCH_ACCESS_TOKEN - https://twitchtokengenerator.com/";
-        public String twitchRefreshToken = "YOUR_TWITCH_REFRESH_TOKEN - https://twitchtokengenerator.com/";
+        public String twitchScopes = "";
+        public String twitchAccessToken = "";
+        public String twitchRefreshToken = "";
 
         public Streamer() {}
 
         public Streamer(int number) {
             this.minecraftNick += number;
-            this.twitchNick += number;
         }
 
         @Override
         public String toString() {
             return new StringBuilder("{")
                     .append("minecraftNick=").append(minecraftNick).append(",")
-                    .append("twitchNick=").append(twitchNick).append(",")
                     .append("platform=").append(platform).append(",")
                     .append("token=").append(token != null ? token.replaceAll("\\w", "#") : null)
-                    .append("twitchClientId=").append(twitchClientId != null ? twitchClientId.replaceAll("\\w", "#") : null)
+                    .append("twitchScopes=").append(twitchScopes != null ? twitchScopes.replaceAll("\\w", "#") : null)
                     .append("twitchAccessToken=").append(twitchAccessToken != null ? twitchAccessToken.replaceAll("\\w", "#") : null)
                     .append("twitchRefreshToken=").append(twitchRefreshToken != null ? twitchRefreshToken.replaceAll("\\w", "#") : null)
                     .append("}")
@@ -242,6 +240,9 @@ public class CredentialsConfig {
     public List<String> moderatorsMinecraft;
     public List<String> moderatorsTwitch;
     public List<Streamer> streamers;
+
+    private transient CommentedConfig rawConfig;
+    private transient File configFile;
 
     public boolean hasPermission(String nickname) {
         if (nickname.equals("@")) // Command block
@@ -261,4 +262,22 @@ public class CredentialsConfig {
         return false;
     }
 
+
+    public void save()
+    {
+        try
+        {
+            ObjectConverter converter = new ObjectConverter();
+
+            this.rawConfig.set("streamers",
+                this.streamers.stream().map(s -> toConfig(converter, s)).toList());
+
+            String formatted = TomlFormat.instance().createWriter().writeToString(this.rawConfig);
+            FileUtils.writeStringToFile(this.configFile, formatted, StandardCharsets.UTF_8);
+        }
+        catch (IOException e)
+        {
+            TwitchSpawn.LOGGER.error("Failed to save credentials config", e);
+        }
+    }
 }
