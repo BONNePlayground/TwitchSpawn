@@ -1,7 +1,6 @@
 package net.programmer.igoodie.twitchspawn.client.screens;
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
@@ -138,24 +138,24 @@ public class TwitchAuthScreen extends Screen
 
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick)
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        this.renderBackground(poseStack);
+        this.renderBackground(guiGraphics);
 
         Font font = this.font;
 
         // Title
-        drawCenteredString(poseStack, font, this.title, this.width / 2, 20, 0xFFFFFF);
+        drawCenteredString(guiGraphics, font, this.title, this.width / 2, 20, 0xFFFFFF);
 
         // Event selection header
         Component eventHeader = Component.translatable("gui.twitchspawn.choose_events");
-        drawCenteredString(poseStack, font, eventHeader, this.width / 2, this.height / 2 - 120, 0xCCCCCC);
+        drawCenteredString(guiGraphics, font, eventHeader, this.width / 2, this.height / 2 - 120, 0xCCCCCC);
 
         // Status message
         if (!this.statusMessage.getString().isEmpty())
         {
             int statusY = this.height / 2 + 120;
-            drawCenteredString(poseStack, font, this.statusMessage, this.width / 2, statusY,
+            drawCenteredString(guiGraphics, font, this.statusMessage, this.width / 2, statusY,
                 this.currentState == AuthState.ERROR ? 0xFF5555 : 0x55FF55);
         }
 
@@ -163,10 +163,16 @@ public class TwitchAuthScreen extends Screen
         if (this.currentState == AuthState.WAITING_FOR_USER && this.userCode != null)
         {
             Component codeText = Component.translatable("gui.twitchspawn.enter_code", this.userCode);
-            drawCenteredString(poseStack, font, codeText, this.width / 2, this.height / 2 + 140, 0xFFFF55);
+            drawCenteredString(guiGraphics, font, codeText, this.width / 2, this.height / 2 + 140, 0xFFFF55);
         }
 
-        super.render(poseStack, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+
+    private static void drawCenteredString(GuiGraphics guiGraphics, Font font, Component component, int x, int y, int color)
+    {
+        guiGraphics.drawString(font, component, (int) ((x - font.width(component) / 2.0)), y, color, true);
     }
 
 
