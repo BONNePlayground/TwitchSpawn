@@ -15,6 +15,7 @@ import net.programmer.igoodie.twitchspawn.configuration.PreferencesConfig;
 import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
+import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnArgumentTypes;
 import net.programmer.igoodie.twitchspawn.registries.TwitchSpawnSoundEvent;
 import net.programmer.igoodie.twitchspawn.tracer.TraceManager;
@@ -28,6 +29,11 @@ public class TwitchSpawn {
      * The plugin mod-id
      */
     public static final String MOD_ID = "twitchspawn";
+
+    /**
+     * The application ID
+     */
+    public static final String APP_ID = "zl42yzk933wes9pjom49ocdkv8tstg";
 
     /**
      * Minecraft server instance.
@@ -79,6 +85,11 @@ public class TwitchSpawn {
             ConfigManager.RULESET_COLLECTION.clearQueue();
         });
 
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S,
+            SyncStreamerDataPacket.ID,
+            SyncStreamerDataPacket.STREAM_CODEC,
+            SyncStreamerDataPacket::handle);
+
         try
         {
             TwitchSpawnSoundEvent.register();
@@ -101,6 +112,7 @@ public class TwitchSpawn {
         NetworkManager.registerS2CPayloadType(GlobalChatCooldownPacket.ID, GlobalChatCooldownPacket.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(OsRunPacket.ID, OsRunPacket.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(StatusChangedPacket.ID, StatusChangedPacket.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(SyncStreamerDataPacket.ID, SyncStreamerDataPacket.STREAM_CODEC);
 
         // Do stuff on player joining the server.
         PlayerEvent.PLAYER_JOIN.register(player ->

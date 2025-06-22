@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,7 @@ import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.eventqueue.EventQueue;
+import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.tslanguage.TSLRuleset;
 import net.programmer.igoodie.twitchspawn.tslanguage.action.TSLAction;
 import net.programmer.igoodie.twitchspawn.tslanguage.event.EventArguments;
@@ -44,6 +46,7 @@ public class TwitchSpawnCommand {
         for (String commandName : COMMAND_NAMES) {
             LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(commandName);
 
+            root.then(Commands.literal("auth").executes(TwitchSpawnCommand::authModule));
             root.then(Commands.literal("status").executes(TwitchSpawnCommand::statusModule));
             root.then(Commands.literal("start").executes(TwitchSpawnCommand::startModule));
             root.then(Commands.literal("stop").executes(TwitchSpawnCommand::stopModule));
@@ -80,6 +83,42 @@ public class TwitchSpawnCommand {
     }
 
     /* ------------------------------------------------------------ */
+
+    public static int authModule(CommandContext<CommandSourceStack> context)
+    {
+        try
+        {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+
+            if (TwitchSpawn.TRACE_MANAGER.isRunning())
+            {
+                context.getSource().sendSuccess(() -> Component.translatable("commands.twitchspawn.auth.on"), false);
+            }
+
+            SyncStreamerDataPacket syncStreamerDataPacket = ConfigManager.CREDENTIALS.streamers.stream().
+                filter(streamer -> streamer.minecraftNick.equalsIgnoreCase(player.getName().getString())).
+                findAny().
+                map(streamer ->
+                    new SyncStreamerDataPacket(player.getName().getString(),
+                        streamer.twitchAccessToken,
+                        streamer.twitchRefreshToken,
+                        streamer.twitchScopes)).
+                orElse(new SyncStreamerDataPacket(player.getName().getString(),
+                    "",
+                    "",
+                    ""));
+
+            NetworkManager.sendToPlayer(player, syncStreamerDataPacket);
+        }
+        catch (CommandSyntaxException e)
+        {
+            TwitchSpawn.LOGGER.error("AUTH is available only for players.");
+            return 0;
+        }
+
+        return 1;
+    }
+
 
     public static int statusModule(CommandContext<CommandSourceStack> context) {
         String translationKey = TwitchSpawn.TRACE_MANAGER.isRunning() ?
