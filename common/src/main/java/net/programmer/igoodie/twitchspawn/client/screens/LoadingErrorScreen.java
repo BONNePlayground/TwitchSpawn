@@ -91,14 +91,6 @@ public class LoadingErrorScreen extends Screen
     }
 
 
-    @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f)
-    {
-        guiGraphics.fillGradient(0, 0, this.width, this.height, -12574688, -11530224);
-        this.renderDirtBackground(guiGraphics);
-    }
-
-
     /**
      * This method reloads configs and repopulates list with new exceptions or close screen if everything
      * is correct.
