@@ -39,5 +39,6 @@
   "commands.twitchspawn.test.not_found": "§4>> Ninguna Lista de Reglas asociada con %s",
   "commands.twitchspawn.test.success": "§a>> Se han puesto en cola las reglas para %s",
 
-  "errors.twitchspawn.loading": "No se puede cargar TwitchSpawn."
+  "errors.twitchspawn.loading": "No se puede cargar TwitchSpawn.",
+  "key.twitchspawn.auth": "Manage Connection to Twitch"
 }
