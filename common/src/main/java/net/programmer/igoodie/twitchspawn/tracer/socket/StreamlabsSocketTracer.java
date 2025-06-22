@@ -36,7 +36,7 @@ public class StreamlabsSocketTracer extends SocketIOTracer {
 
     @Override
     protected void onConnect(Socket socket, CredentialsConfig.Streamer streamer, Object... args) {
-        TwitchSpawn.LOGGER.info("Connected to Streamlabs Socket API with {}'s token successfully!", streamer.twitchNick);
+        TwitchSpawn.LOGGER.info("Connected to Streamlabs Socket API with {}'s token successfully!", streamer.minecraftNick);
         authorized = true;
     }
 
@@ -46,7 +46,7 @@ public class StreamlabsSocketTracer extends SocketIOTracer {
                 streamer.minecraftNick, authorized ? "intentional" : "unauthorized");
 
         if (manager.isRunning() && !authorized) { // TODO: concern what to do in this case?
-            manager.stop(null, streamer.twitchNick + " unauthorized by the socket server");
+            manager.stop(null, streamer.minecraftNick + " unauthorized by the socket server");
         }
     }
 
