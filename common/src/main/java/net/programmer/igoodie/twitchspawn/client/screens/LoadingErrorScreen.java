@@ -81,13 +81,13 @@ public class LoadingErrorScreen extends Screen
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick)
     {
-        super.render(poseStack, mouseX, mouseY, partialTick);
         this.entryList.render(poseStack, mouseX, mouseY, partialTick);
         drawMultiLineCenteredString(poseStack,
             font,
             errorScreenTitle,
             this.width / 2,
             10);
+        super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
 
