@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.programmer.igoodie.twitchspawn.client.TwitchSpawnClient;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
@@ -81,8 +82,14 @@ public class SyncStreamerDataPacket
                 ConfigManager.CREDENTIALS.streamers.add(streamer);
             }
 
-            EnvExecutor.runInEnv(Env.CLIENT, () -> TwitchSpawnClient::openAuth);
-            EnvExecutor.runInEnv(Env.SERVER, () -> () -> ConfigManager.CREDENTIALS.save());
+            if (context.get().getEnv() == EnvType.SERVER)
+            {
+                EnvExecutor.runInEnv(Env.SERVER, () -> () -> ConfigManager.CREDENTIALS.save());
+            }
+            else
+            {
+                EnvExecutor.runInEnv(Env.CLIENT, () -> TwitchSpawnClient::openAuth);
+            }
         });
     }
 
