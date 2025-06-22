@@ -79,7 +79,7 @@ public record SyncStreamerDataPacket(String playerName,
 
 
     public static final Type<SyncStreamerDataPacket> ID =
-        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "sync_data_packet"));
+        new Type<>(ResourceLocation.fromNamespaceAndPath(TwitchSpawn.MOD_ID, "sync_data_packet"));
 
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncStreamerDataPacket> STREAM_CODEC = StreamCodec.composite(
