@@ -89,7 +89,7 @@ public class TwitchAuthScreen extends Screen
             int y = startY + (i * spacing);
 
             ScopeCheckbox checkbox = new ScopeCheckbox(
-                x, y, checkboxWidth, checkboxHeight,
+                x, y,
                 Component.translatable(eventInfo.description),
                 eventInfo.eventType,
                 eventInfo.requiredScopes,
@@ -97,7 +97,7 @@ public class TwitchAuthScreen extends Screen
             );
 
             this.eventCheckboxes.add(checkbox);
-            this.addRenderableWidget(checkbox);
+            this.addRenderableWidget(checkbox.getCheckbox());
         }
     }
 
@@ -131,7 +131,7 @@ public class TwitchAuthScreen extends Screen
                 }
 
                 // Disable checkboxes
-                scopeCheckbox.active = false;
+                scopeCheckbox.setActive(false);
             });
         }
     }
@@ -185,7 +185,7 @@ public class TwitchAuthScreen extends Screen
         this.authorizeButton.setMessage(Component.translatable("gui.twitchspawn.auth_button"));
         this.authorizeButton.active = true;
 
-        this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.active = true);
+        this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.setActive(true));
 
         // rework access token
         ConfigManager.CREDENTIALS.streamers.
@@ -213,7 +213,7 @@ public class TwitchAuthScreen extends Screen
 
     private void startDeviceFlow()
     {
-        this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.active = false);
+        this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.setActive(false));
 
         // Get selected events and their required scopes
         List<String> selectedEvents = this.getSelectedEvents();
@@ -250,7 +250,7 @@ public class TwitchAuthScreen extends Screen
             }
             catch (Exception e)
             {
-                this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.active = true);
+                this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.setActive(true));
 
                 this.currentState = AuthState.ERROR;
                 this.statusMessage = Component.translatable("gui.twitchspawn.status_error", e.getMessage());
@@ -264,7 +264,7 @@ public class TwitchAuthScreen extends Screen
     private List<String> getSelectedEvents()
     {
         return this.eventCheckboxes.stream().
-            filter(Checkbox::selected).
+            filter(ScopeCheckbox::selected).
             map(ScopeCheckbox::getEventType).
             collect(Collectors.toList());
     }
@@ -275,7 +275,7 @@ public class TwitchAuthScreen extends Screen
         Set<String> allRequiredScopes = new HashSet<>();
 
         this.eventCheckboxes.stream().
-            filter(Checkbox::selected).
+            filter(ScopeCheckbox::selected).
             forEach(checkbox ->
             {
                 String[] scopes = checkbox.getRequiredScopes().split(" ");
@@ -415,40 +415,54 @@ public class TwitchAuthScreen extends Screen
     /**
      * The checkbox that allows to select and deselect scopes.
      */
-    private static class ScopeCheckbox extends Checkbox
+    private static class ScopeCheckbox
     {
-        public ScopeCheckbox(int x, int y, int width, int height, Component message,
+        public ScopeCheckbox(int x, int y, Component message,
             String eventType, String requiredScopes, boolean selected)
         {
-            super(x, y, width, height, message, selected);
+            this.checkbox = Checkbox.builder(message, Minecraft.getInstance().font).
+                pos(x, y).
+                selected(selected).
+                build();
             this.eventType = eventType;
             this.requiredScopes = requiredScopes;
         }
 
+        public Checkbox getCheckbox()
+        {
+            return this.checkbox;
+        }
 
-        @Override
         public void onPress()
         {
-            if (this.active)
+            if (this.checkbox.active)
             {
-                super.onPress();
+                this.checkbox.onPress();
             }
         }
 
+        public boolean selected()
+        {
+            return this.checkbox.selected();
+        }
+
+        public void setActive(boolean active)
+        {
+            this.checkbox.active = active;
+        }
 
         public String getEventType()
         {
             return this.eventType;
         }
 
-
         public String getRequiredScopes()
         {
             return this.requiredScopes;
         }
 
+        private final Checkbox checkbox;
         private final String eventType;
-
         private final String requiredScopes;
     }
 
