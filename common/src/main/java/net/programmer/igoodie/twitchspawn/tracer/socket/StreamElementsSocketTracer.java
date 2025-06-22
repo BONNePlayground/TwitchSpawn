@@ -38,7 +38,7 @@ public class StreamElementsSocketTracer extends SocketIOTracer {
         } catch (JSONException ignored) {} // Must be impossible
 
         socket.on("authenticated", foo -> {
-            TwitchSpawn.LOGGER.info("Connected to StreamElements Socket API with {}'s token successfully!", streamer.twitchNick);
+            TwitchSpawn.LOGGER.info("Connected to StreamElements Socket API with {}'s token successfully!", streamer.minecraftNick);
             authorized = true;
         });
 
@@ -48,7 +48,7 @@ public class StreamElementsSocketTracer extends SocketIOTracer {
             public void run() {
                 if (manager.isRunning() && !authorized) {
                     TwitchSpawn.LOGGER.info("Disconnected from {}'s StreamElements Socket connection. (unauthorized)", streamer.minecraftNick);
-                    manager.stop(null, streamer.twitchNick + " unauthorized by the socket server");
+                    manager.stop(null, streamer.minecraftNick + " unauthorized by the socket server");
                 }
             }
         }, 5000);
