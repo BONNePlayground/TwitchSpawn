@@ -40,7 +40,7 @@ dependencies {
     shadowBundle "io.socket:socket.io-client:$rootProject.socket_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionForge')
+    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     forgeRuntimeLibrary "com.squareup.okhttp3:okhttp:$rootProject.okhttp_version"
     forgeRuntimeLibrary "io.socket:socket.io-client:$rootProject.socket_version"
