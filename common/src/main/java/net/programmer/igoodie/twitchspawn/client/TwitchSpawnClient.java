@@ -9,15 +9,18 @@ package net.programmer.igoodie.twitchspawn.client;
 
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.networking.NetworkManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.client.gui.GlobalChatCooldownOverlay;
 import net.programmer.igoodie.twitchspawn.client.gui.StatusIndicatorOverlay;
 import net.programmer.igoodie.twitchspawn.client.screens.LoadingErrorScreen;
+import net.programmer.igoodie.twitchspawn.client.screens.TwitchAuthScreen;
 import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
+import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.udl.NotepadUDLUpdater;
 
 
@@ -53,6 +56,11 @@ public class TwitchSpawnClient
             StatusChangedPacket.ID,
             StatusChangedPacket.STREAM_CODEC,
             StatusChangedPacket::handle);
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C,
+            SyncStreamerDataPacket.ID,
+            SyncStreamerDataPacket.STREAM_CODEC,
+            SyncStreamerDataPacket::handle);
     }
 
 
@@ -73,5 +81,11 @@ public class TwitchSpawnClient
                 client.setScreen(errorScreen);
             }
         });
+    }
+
+
+    public static void openAuth()
+    {
+        Minecraft.getInstance().setScreen(new TwitchAuthScreen());
     }
 }
