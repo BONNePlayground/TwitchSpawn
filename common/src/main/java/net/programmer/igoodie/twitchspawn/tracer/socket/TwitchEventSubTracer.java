@@ -1,5 +1,7 @@
 package net.programmer.igoodie.twitchspawn.tracer.socket;
 
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
@@ -52,17 +54,28 @@ public class TwitchEventSubTracer extends WebSocketTracer
         for (CredentialsConfig.Streamer streamer : ConfigManager.CREDENTIALS.streamers)
         {
             // Validate token before connecting
-            if (!validateToken(streamer))
+            if (!this.validateToken(streamer))
             {
-                TwitchSpawn.LOGGER.error("Invalid token for streamer: {}", streamer.twitchNick);
+                TwitchSpawn.LOGGER.error("Invalid token for streamer: {}", streamer.minecraftNick);
+
+                if (TwitchSpawn.SERVER != null)
+                {
+                    ServerPlayer player = TwitchSpawn.SERVER.getPlayerList().getPlayerByName(streamer.minecraftNick);
+
+                    if (player != null)
+                    {
+                        player.sendMessage(new TranslatableComponent("errors.twitchspawn.invalid_token"), player.getUUID());
+                    }
+                }
+
                 continue;
             }
 
-            WebSocketListener socket = createSocket(streamer);
+            WebSocketListener socket = this.createSocket(streamer);
             this.sockets.add(startClient(socket));
 
             // Initialize cooldown bucket for chat
-            this.cooldownBuckets.put(streamer.twitchNick,
+            this.cooldownBuckets.put(streamer.minecraftNick,
                 new CooldownBucket(ConfigManager.PREFERENCES.chatGlobalCooldown,
                     ConfigManager.PREFERENCES.chatIndividualCooldown));
         }
@@ -94,7 +107,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
     @Override
     protected void onOpen(CredentialsConfig.Streamer streamer, WebSocket socket, Response response)
     {
-        TwitchSpawn.LOGGER.info("Connected to Twitch EventSub WebSocket for {}", streamer.twitchNick);
+        TwitchSpawn.LOGGER.info("Connected to Twitch EventSub WebSocket for {}", streamer.minecraftNick);
     }
 
 
@@ -114,7 +127,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             JSONObject metadata = message.getJSONObject("metadata");
             String messageType = metadata.getString("message_type");
 
-            TwitchSpawn.LOGGER.debug("Received EventSub message type: {} for {}", messageType, streamer.twitchNick);
+            TwitchSpawn.LOGGER.debug("Received EventSub message type: {} for {}", messageType, streamer.minecraftNick);
 
             switch (messageType)
             {
@@ -182,7 +195,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             String sessionId = session.getString("id");
             int keepaliveTimeoutSeconds = session.optInt("keepalive_timeout_seconds", 600);
 
-            TwitchSpawn.LOGGER.info("EventSub session established for {} with ID: {}", streamer.twitchNick, sessionId);
+            TwitchSpawn.LOGGER.info("EventSub session established for {} with ID: {}", streamer.minecraftNick, sessionId);
 
             // Start keepalive timer
             this.startKeepAliveTimer(keepaliveTimeoutSeconds);
@@ -249,7 +262,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
         {
             String title = event.getJSONObject("reward").getString("title");
             int cost = event.getJSONObject("reward").getInt("cost");
-            String actorNickname = event.optString("user_name", streamer.twitchNick);
+            String actorNickname = event.optString("user_name", streamer.minecraftNick);
             String actorMessage = event.optString("user_input", "");
 
             EventArguments eventArguments = new EventArguments("channelPointReward", "twitch");
@@ -298,7 +311,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 subscriptionMonths = badges.get("subscriber");
             }
 
-            CooldownBucket cooldownBucket = this.cooldownBuckets.get(streamer.twitchNick);
+            CooldownBucket cooldownBucket = this.cooldownBuckets.get(streamer.minecraftNick);
 
             EventArguments eventArguments = new EventArguments("chat", "twitch");
             eventArguments.streamerNickname = streamer.minecraftNick;
@@ -341,7 +354,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             String followerName = event.getString("user_name");
             String followedAt = event.optString("followed_at", "");
 
-            TwitchSpawn.LOGGER.info("New follower for {}: {}", streamer.twitchNick, followerName);
+            TwitchSpawn.LOGGER.info("New follower for {}: {}", streamer.minecraftNick, followerName);
 
             EventArguments eventArguments = new EventArguments("follow", "twitch");
             eventArguments.streamerNickname = streamer.minecraftNick;
@@ -369,7 +382,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             int subscriptionTier = Integer.parseInt(tier) / 1000;
 
             TwitchSpawn.LOGGER.info("New subscription for {}: {} (Tier {}, Gift: {})",
-                streamer.twitchNick, subscriberName, subscriptionTier, isGift);
+                streamer.minecraftNick, subscriberName, subscriptionTier, isGift);
 
             EventArguments eventArguments = new EventArguments("subscription", "twitch");
             eventArguments.streamerNickname = streamer.minecraftNick;
@@ -402,7 +415,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             int subscriptionTier = Integer.parseInt(tier) / 1000;
 
             TwitchSpawn.LOGGER.info("Resubscription for {}: {} ({} months total, {} streak, Tier {})",
-                streamer.twitchNick, subscriberName, cumulativeMonths, streakMonths, subscriptionTier);
+                streamer.minecraftNick, subscriberName, cumulativeMonths, streakMonths, subscriptionTier);
 
             EventArguments eventArguments = new EventArguments("resub", "twitch");
             eventArguments.streamerNickname = streamer.minecraftNick;
@@ -437,7 +450,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             String displayGifterName = isAnonymous ? "Anonymous" : gifterName;
 
             TwitchSpawn.LOGGER.info("Gift subscription for {}: {} gifted {} sub(s) to {} (Tier {})",
-                streamer.twitchNick, displayGifterName, total, recipientName, subscriptionTier);
+                streamer.minecraftNick, displayGifterName, total, recipientName, subscriptionTier);
 
             EventArguments eventArguments = new EventArguments("subMysteryGift", "twitch");
             eventArguments.streamerNickname = streamer.minecraftNick;
@@ -512,7 +525,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             JSONObject session = payload.getJSONObject("session");
             String reconnectUrl = session.getString("reconnect_url");
 
-            TwitchSpawn.LOGGER.info("EventSub requesting reconnect for {}: {}", streamer.twitchNick, reconnectUrl);
+            TwitchSpawn.LOGGER.info("EventSub requesting reconnect for {}: {}", streamer.minecraftNick, reconnectUrl);
 
             // Close current connection and reconnect to new URL
             socket.close(1000, "Reconnecting");
@@ -536,7 +549,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             JSONObject subscription = payload.getJSONObject("subscription");
             String status = subscription.getString("status");
 
-            TwitchSpawn.LOGGER.error("EventSub subscription revoked for {}: {}", streamer.twitchNick, status);
+            TwitchSpawn.LOGGER.error("EventSub subscription revoked for {}: {}", streamer.minecraftNick, status);
         }
         catch (JSONException e)
         {
@@ -551,232 +564,34 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
         if (userId == null)
         {
-            TwitchSpawn.LOGGER.error("Could not get user ID for {}", streamer.twitchNick);
+            TwitchSpawn.LOGGER.error("Could not get user ID for {}", streamer.minecraftNick);
             return;
         }
 
-        // Subscribe to channel point redemptions
-        this.subscribeToChannelPointRedemptions(streamer, sessionId, userId);
-
-        // Subscribe to chat messages
-        this.subscribeToChatMessages(streamer, sessionId, userId);
-
-        // Subscribe to follows
-        this.subscribeToFollows(streamer, sessionId, userId);
-
-        // Subscribe to subscriptions
-        this.subscribeToSubscriptions(streamer, sessionId, userId);
-
-        // Subscribe to resubscriptions
-        this.subscribeToResubscriptions(streamer, sessionId, userId);
-
-        // Subscribe to gift subscriptions
-        this.subscribeToGiftSubscriptions(streamer, sessionId, userId);
-
-        // Subscribe to raids
-        this.subscribeToRaids(streamer, sessionId, userId);
-
-        // Subscribe to raids
-        this.subscribeToBits(streamer, sessionId, userId);
+        // Subscribe to events
+        for (String scope : streamer.twitchScopes.split(" "))
+        {
+            this.subscribeToEvents(streamer, scope, sessionId, userId);
+        }
     }
 
 
-    private void subscribeToChannelPointRedemptions(CredentialsConfig.Streamer streamer,
+    private void subscribeToEvents(CredentialsConfig.Streamer streamer,
+        String scope,
         String sessionId,
         String userId)
     {
         try
         {
             JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.channel_points_custom_reward_redemption.add");
-            subscription.put("version", "1");
+            subscription.put("type", scope);
+            subscription.put("version", "channel.follow".equals(scope) ? "2" : "1");
 
             JSONObject condition = new JSONObject();
             condition.put("broadcaster_user_id", userId);
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to channel point redemptions", e);
-        }
-    }
-
-
-    private void subscribeToChatMessages(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.chat.message");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            condition.put("user_id", userId); // Bot's user ID (same as broadcaster for self-bot)
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to chat messages", e);
-        }
-    }
-
-
-    private void subscribeToFollows(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.follow");
-            subscription.put("version", "2");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            condition.put("moderator_user_id", userId); // Required for follow events - using broadcaster as moderator
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to follows", e);
-        }
-    }
-
-
-    private void subscribeToSubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.subscribe");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to subscriptions", e);
-        }
-    }
-
-
-    private void subscribeToResubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.subscription.message");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to resubscriptions", e);
-        }
-    }
-
-
-    private void subscribeToGiftSubscriptions(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.subscription.gift");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to gift subscriptions", e);
-        }
-    }
-
-
-    private void subscribeToBits(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.cheer");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
-            condition.put("broadcaster_user_id", userId);
-            subscription.put("condition", condition);
-
-            JSONObject transport = new JSONObject();
-            transport.put("method", "websocket");
-            transport.put("session_id", sessionId);
-            subscription.put("transport", transport);
-
-            this.makeHelixApiCall("POST", "/eventsub/subscriptions", streamer, subscription.toString());
-        }
-        catch (JSONException e)
-        {
-            TwitchSpawn.LOGGER.error("Error subscribing to bits", e);
-        }
-    }
-
-
-    private void subscribeToRaids(CredentialsConfig.Streamer streamer, String sessionId, String userId)
-    {
-        try
-        {
-            JSONObject subscription = new JSONObject();
-            subscription.put("type", "channel.raid");
-            subscription.put("version", "1");
-
-            JSONObject condition = new JSONObject();
             condition.put("to_broadcaster_user_id", userId);
+            condition.put("user_id", userId);
+            condition.put("moderator_user_id", userId);
             subscription.put("condition", condition);
 
             JSONObject transport = new JSONObject();
@@ -788,7 +603,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
         }
         catch (JSONException e)
         {
-            TwitchSpawn.LOGGER.error("Error subscribing to raids", e);
+            TwitchSpawn.LOGGER.error("Error subscribing to " + scope + " redemptions", e);
         }
     }
 
@@ -802,7 +617,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
         }
         catch (Exception e)
         {
-            TwitchSpawn.LOGGER.error("Token validation failed for {}", streamer.twitchNick, e);
+            TwitchSpawn.LOGGER.error("Token validation failed for {}", streamer.minecraftNick, e);
             return false;
         }
     }
@@ -825,7 +640,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
         }
         catch (Exception e)
         {
-            TwitchSpawn.LOGGER.error("Error getting user ID for {}", streamer.twitchNick, e);
+            TwitchSpawn.LOGGER.error("Error getting user ID for {}", streamer.minecraftNick, e);
         }
         return null;
     }
@@ -840,7 +655,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             Request.Builder requestBuilder = new Request.Builder()
                 .url(HELIX_API_BASE + endpoint)
                 .addHeader("Authorization", "Bearer " + streamer.twitchAccessToken)
-                .addHeader("Client-Id", streamer.twitchClientId)
+                .addHeader("Client-Id", TwitchSpawn.APP_ID)
                 .addHeader("Content-Type", "application/json");
 
             if ("POST".equals(method) && body != null)
@@ -852,16 +667,17 @@ public class TwitchEventSubTracer extends WebSocketTracer
                 requestBuilder.get();
             }
 
-            Response response = client.newCall(requestBuilder.build()).execute();
-
-            if (response.isSuccessful())
+            try (Response response = client.newCall(requestBuilder.build()).execute())
             {
-                return response.body().string();
-            }
-            else
-            {
-                TwitchSpawn.LOGGER.error("API call failed: {} {} - {}", method, endpoint, response.code());
-                return null;
+                if (response.isSuccessful())
+                {
+                    return response.body().string();
+                }
+                else
+                {
+                    TwitchSpawn.LOGGER.error("API call failed: {} {} - {}", method, endpoint, response.code());
+                    return null;
+                }
             }
         }
         catch (IOException e)
@@ -898,7 +714,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
     @Override
     protected void onClosing(CredentialsConfig.Streamer streamer, WebSocket socket, int code, String reason)
     {
-        TwitchSpawn.LOGGER.info("EventSub WebSocket closing for {}: {} - {}", streamer.twitchNick, code, reason);
+        TwitchSpawn.LOGGER.info("EventSub WebSocket closing for {}: {} - {}", streamer.minecraftNick, code, reason);
         socket.close(1000, null);
     }
 
@@ -906,7 +722,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
     @Override
     protected void onFailure(CredentialsConfig.Streamer streamer, WebSocket socket, Throwable t, Response response)
     {
-        TwitchSpawn.LOGGER.error("EventSub WebSocket failed for {}", streamer.twitchNick, t);
+        TwitchSpawn.LOGGER.error("EventSub WebSocket failed for {}", streamer.minecraftNick, t);
 
         this.sockets.remove(socket);
 
@@ -916,7 +732,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
             @Override
             public void run()
             {
-                TwitchSpawn.LOGGER.info("Attempting to reconnect EventSub WebSocket for {}", streamer.twitchNick);
+                TwitchSpawn.LOGGER.info("Attempting to reconnect EventSub WebSocket for {}", streamer.minecraftNick);
                 WebSocketListener newSocket = createSocket(streamer);
                 WebSocket ws = startClient(newSocket);
                 sockets.add(ws);

@@ -38,5 +38,39 @@
   "commands.twitchspawn.test.not_found": "§4>> No ruleset associated with %s",
   "commands.twitchspawn.test.success": "§a>> Successfully queued rules for %s",
 
-  "errors.twitchspawn.loading": "Cannot load TwitchSpawn"
+  "commands.twitchspawn.auth.on": "§3>> TwitchSpawn is currently running. [ON] You will need to restart it after authorization finishes.",
+
+  "errors.twitchspawn.loading": "Cannot load TwitchSpawn",
+  "errors.twitchspawn.invalid_token": "TwitchSpawn token is not valid. Try `/twitchspawn auth` to generate a new token",
+  "key.twitchspawn.auth": "Manage Connection to Twitch",
+
+  "gui.twitchspawn.auth_screen_title": "Twitch Connect",
+  "gui.twitchspawn.auth_button": "Authorize Twitch",
+  "gui.twitchspawn.retry_button": "Retry",
+  "gui.twitchspawn.connected_button": "Connected!",
+  "gui.twitchspawn.disconnect_button": "Disconnect from Twitch",
+  "gui.twitchspawn.open_browser_button": "Open Browser",
+  "gui.twitchspawn.choose_events": "Select events to subscribe to:",
+  "gui.twitchspawn.status_select_event": "Please select at least one event to subscribe to.",
+  "gui.twitchspawn.status_connecting": "Connecting...",
+  "gui.twitchspawn.status_click_browser": "Click 'Open Browser' and enter the code shown below.",
+  "gui.twitchspawn.status_error": "Failed to start authentication: %s",
+  "gui.twitchspawn.status_authorized": "Successfully connected to Twitch!",
+  "gui.twitchspawn.status_expired_token": "Authorization expired. Please try again.",
+  "gui.twitchspawn.status_denied": "Authorization denied by user.",
+  "gui.twitchspawn.status_failed": "Authorization failed: %s",
+  "gui.twitchspawn.status_polling_error": "Polling error: %s",
+  "gui.twitchspawn.status_timeout": "Authorization timed out. Please try again.",
+  "gui.twitchspawn.status_open_browser": "Browser opened. Please complete authorization.",
+  "gui.twitchspawn.status_failed_to_open": "Could not open browser. URL: %s",
+  "gui.twitchspawn.status_disconnected": "You are disconnected from TwitchSpawn.",
+  "gui.twitchspawn.enter_code": "Enter this code: %s",
+
+  "gui.twitchspawn.event_channel_points": "Channel Point Redemptions",
+  "gui.twitchspawn.event_chat_messages": "Chat Messages",
+  "gui.twitchspawn.event_follows": "New Followers",
+  "gui.twitchspawn.event_subscriptions": "Subscriptions",
+  "gui.twitchspawn.event_gift_subscriptions": "Gift Subscriptions",
+  "gui.twitchspawn.event_raids": "Raids",
+  "gui.twitchspawn.event_bits": "Bits/Cheers"
 }
