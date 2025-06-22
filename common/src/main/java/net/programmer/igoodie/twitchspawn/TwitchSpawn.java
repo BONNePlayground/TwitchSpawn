@@ -28,6 +28,11 @@ public class TwitchSpawn {
     public static final String MOD_ID = "twitchspawn";
 
     /**
+     * The application ID
+     */
+    public static final String APP_ID = "zl42yzk933wes9pjom49ocdkv8tstg";
+
+    /**
      * Minecraft server instance.
      */
     public static MinecraftServer SERVER;
