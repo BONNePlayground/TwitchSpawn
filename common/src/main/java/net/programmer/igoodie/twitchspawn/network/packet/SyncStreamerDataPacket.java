@@ -82,13 +82,13 @@ public class SyncStreamerDataPacket
                 ConfigManager.CREDENTIALS.streamers.add(streamer);
             }
 
-            if (context.get().getEnv() == EnvType.SERVER)
+            if (context.get().getEnv() == EnvType.CLIENT)
             {
-                EnvExecutor.runInEnv(Env.SERVER, () -> () -> ConfigManager.CREDENTIALS.save());
+                EnvExecutor.runInEnv(Env.CLIENT, () -> TwitchSpawnClient::openAuth);
             }
             else
             {
-                EnvExecutor.runInEnv(Env.CLIENT, () -> TwitchSpawnClient::openAuth);
+                ConfigManager.CREDENTIALS.save();
             }
         });
     }
