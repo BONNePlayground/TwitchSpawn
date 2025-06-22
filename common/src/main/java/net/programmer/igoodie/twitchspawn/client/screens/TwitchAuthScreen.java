@@ -48,8 +48,7 @@ public class TwitchAuthScreen extends Screen
 
         // Connect button positioned below checkboxes
         int buttonY = this.height / 2 + 80;
-        this.authorizeButton = new Button(this.width / 2 - 100, buttonY, 200, 20,
-            Component.translatable(this.currentState != AuthState.CONNECTED ?
+        this.authorizeButton = Button.builder(Component.translatable(this.currentState != AuthState.CONNECTED ?
                 "gui.twitchspawn.auth_button" : "gui.twitchspawn.disconnect_button"),
             button ->
             {
@@ -65,7 +64,10 @@ public class TwitchAuthScreen extends Screen
                 {
                     this.disconnect();
                 }
-            });
+            }).
+            size(200, 20).
+            pos(this.width / 2 - 100, buttonY).
+            build();
 
         this.addRenderableWidget(this.authorizeButton);
     }
