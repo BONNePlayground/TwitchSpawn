@@ -7,65 +7,41 @@
 package net.programmer.igoodie.twitchspawn.network.packet;
 
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.NotNull;
 
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.client.TwitchSpawnClient;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
 
 
-public class SyncStreamerDataPacket
-
+public record SyncStreamerDataPacket(String playerName,
+                                     String twitchToken,
+                                     String twitchRefreshToken,
+                                     String subscribeScopes) implements CustomPacketPayload
 {
-    public SyncStreamerDataPacket(
-        String playerName,
-        String twitchToken,
-        String twitchRefreshToken,
-        String subscribeScopes)
+    public static void handle(SyncStreamerDataPacket data, NetworkManager.PacketContext packetContext)
     {
-        this.playerName = playerName;
-        this.twitchToken = twitchToken;
-        this.twitchRefreshToken = twitchRefreshToken;
-        this.subscribeScopes = subscribeScopes;
-    }
-
-
-    public static void encode(SyncStreamerDataPacket packet, FriendlyByteBuf buffer)
-    {
-        buffer.writeUtf(packet.playerName);
-        buffer.writeUtf(packet.twitchToken);
-        buffer.writeUtf(packet.twitchRefreshToken);
-        buffer.writeUtf(packet.subscribeScopes);
-    }
-
-
-    public static SyncStreamerDataPacket decode(FriendlyByteBuf buffer)
-    {
-        return new SyncStreamerDataPacket(buffer.readUtf(),
-            buffer.readUtf(),
-            buffer.readUtf(),
-            buffer.readUtf());
-    }
-
-
-    public void handle(Supplier<NetworkManager.PacketContext> context)
-    {
-        context.get().queue(() ->
+        packetContext.queue(() ->
         {
             boolean updated = false;
 
             for (CredentialsConfig.Streamer streamer : ConfigManager.CREDENTIALS.streamers)
             {
-                if (streamer.minecraftNick.equalsIgnoreCase(this.playerName))
+                if (streamer.minecraftNick.equalsIgnoreCase(data.playerName))
                 {
-                    streamer.twitchAccessToken = this.twitchToken;
-                    streamer.twitchRefreshToken = this.twitchRefreshToken;
-                    streamer.twitchScopes = this.subscribeScopes;
+                    streamer.twitchAccessToken = data.twitchToken;
+                    streamer.twitchRefreshToken = data.twitchRefreshToken;
+                    streamer.twitchScopes = data.subscribeScopes;
 
                     updated = true;
                 }
@@ -74,15 +50,15 @@ public class SyncStreamerDataPacket
             if (!updated)
             {
                 CredentialsConfig.Streamer streamer = new CredentialsConfig.Streamer();
-                streamer.minecraftNick = this.playerName;
-                streamer.twitchAccessToken = this.twitchToken;
-                streamer.twitchRefreshToken = this.twitchRefreshToken;
-                streamer.twitchScopes = this.subscribeScopes;
+                streamer.minecraftNick = data.playerName;
+                streamer.twitchAccessToken = data.twitchToken;
+                streamer.twitchRefreshToken = data.twitchRefreshToken;
+                streamer.twitchScopes = data.subscribeScopes;
 
                 ConfigManager.CREDENTIALS.streamers.add(streamer);
             }
 
-            if (context.get().getEnv() == EnvType.CLIENT)
+            if (packetContext.getEnv() == EnvType.CLIENT)
             {
                 EnvExecutor.runInEnv(Env.CLIENT, () -> TwitchSpawnClient::openAuth);
             }
@@ -93,11 +69,24 @@ public class SyncStreamerDataPacket
         });
     }
 
-    private final String playerName;
 
-    private final String twitchToken;
+    @Override
+    @NotNull
+    public Type<? extends CustomPacketPayload> type()
+    {
+        return SyncStreamerDataPacket.ID;
+    }
 
-    private final String twitchRefreshToken;
 
-    private final String subscribeScopes;
+    public static final Type<SyncStreamerDataPacket> ID =
+        new Type<>(new ResourceLocation(TwitchSpawn.MOD_ID, "sync_data_packet"));
+
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncStreamerDataPacket> STREAM_CODEC = StreamCodec.composite(
+        ByteBufCodecs.STRING_UTF8, SyncStreamerDataPacket::playerName,
+        ByteBufCodecs.STRING_UTF8, SyncStreamerDataPacket::twitchToken,
+        ByteBufCodecs.STRING_UTF8, SyncStreamerDataPacket::twitchRefreshToken,
+        ByteBufCodecs.STRING_UTF8, SyncStreamerDataPacket::subscribeScopes,
+        SyncStreamerDataPacket::new
+    );
 }

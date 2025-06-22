@@ -20,6 +20,7 @@ import net.programmer.igoodie.twitchspawn.events.TwitchSpawnClientGuiEvent;
 import net.programmer.igoodie.twitchspawn.network.packet.GlobalChatCooldownPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
 import net.programmer.igoodie.twitchspawn.network.packet.StatusChangedPacket;
+import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.udl.NotepadUDLUpdater;
 
 
@@ -55,6 +56,11 @@ public class TwitchSpawnClient
             StatusChangedPacket.ID,
             StatusChangedPacket.STREAM_CODEC,
             StatusChangedPacket::handle);
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C,
+            SyncStreamerDataPacket.ID,
+            SyncStreamerDataPacket.STREAM_CODEC,
+            SyncStreamerDataPacket::handle);
     }
 
 

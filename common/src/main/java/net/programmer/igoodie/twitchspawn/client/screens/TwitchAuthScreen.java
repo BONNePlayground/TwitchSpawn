@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -17,7 +18,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
-import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.twitchauth.TwitchApiClient;
 
@@ -140,22 +140,20 @@ public class TwitchAuthScreen extends Screen
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-
-        Font font = this.font;
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // Title
-        drawCenteredString(guiGraphics, font, this.title, this.width / 2, 20, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
 
         // Event selection header
         Component eventHeader = Component.translatable("gui.twitchspawn.choose_events");
-        drawCenteredString(guiGraphics, font, eventHeader, this.width / 2, this.height / 2 - 120, 0xCCCCCC);
+        guiGraphics.drawCenteredString(this.font, eventHeader, this.width / 2, this.height / 2 - 120, 0xCCCCCC);
 
         // Status message
         if (!this.statusMessage.getString().isEmpty())
         {
             int statusY = this.height / 2 + 120;
-            drawCenteredString(guiGraphics, font, this.statusMessage, this.width / 2, statusY,
+            guiGraphics.drawCenteredString(this.font, this.statusMessage, this.width / 2, statusY,
                 this.currentState == AuthState.ERROR ? 0xFF5555 : 0x55FF55);
         }
 
@@ -163,16 +161,8 @@ public class TwitchAuthScreen extends Screen
         if (this.currentState == AuthState.WAITING_FOR_USER && this.userCode != null)
         {
             Component codeText = Component.translatable("gui.twitchspawn.enter_code", this.userCode);
-            drawCenteredString(guiGraphics, font, codeText, this.width / 2, this.height / 2 + 140, 0xFFFF55);
+            guiGraphics.drawCenteredString(this.font, codeText, this.width / 2, this.height / 2 + 140, 0xFFFF55);
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-    }
-
-
-    private static void drawCenteredString(GuiGraphics guiGraphics, Font font, Component component, int x, int y, int color)
-    {
-        guiGraphics.drawString(font, component, (int) ((x - font.width(component) / 2.0)), y, color, true);
     }
 
 
@@ -202,7 +192,7 @@ public class TwitchAuthScreen extends Screen
                 }
             });
 
-        NetworkManager.CHANNEL.sendToServer(new SyncStreamerDataPacket(
+        NetworkManager.sendToServer(new SyncStreamerDataPacket(
             Minecraft.getInstance().player.getName().getString(),
             "",
             "",
@@ -375,7 +365,7 @@ public class TwitchAuthScreen extends Screen
     private void saveTokensAndEvents(String accessToken, String refreshToken, List<String> selectedEvents)
     {
         // send token to server
-        NetworkManager.CHANNEL.sendToServer(new SyncStreamerDataPacket(
+        NetworkManager.sendToServer(new SyncStreamerDataPacket(
             Minecraft.getInstance().player.getName().getString(),
             accessToken,
             refreshToken,

@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -17,9 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
-import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
 import net.programmer.igoodie.twitchspawn.eventqueue.EventQueue;
-import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.SyncStreamerDataPacket;
 import net.programmer.igoodie.twitchspawn.tslanguage.TSLRuleset;
 import net.programmer.igoodie.twitchspawn.tslanguage.action.TSLAction;
@@ -109,7 +108,7 @@ public class TwitchSpawnCommand {
                     "",
                     ""));
 
-            NetworkManager.CHANNEL.sendToPlayer(player, syncStreamerDataPacket);
+            NetworkManager.sendToPlayer(player, syncStreamerDataPacket);
         }
         catch (CommandSyntaxException e)
         {
