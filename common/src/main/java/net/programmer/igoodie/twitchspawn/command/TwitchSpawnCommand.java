@@ -92,7 +92,7 @@ public class TwitchSpawnCommand {
 
             if (TwitchSpawn.TRACE_MANAGER.isRunning())
             {
-                context.getSource().sendSuccess(new TranslatableComponent("commands.twitchspawn.auth.on"), false);
+                context.getSource().sendSuccess(Component.translatable("commands.twitchspawn.auth.on"), false);
             }
 
             SyncStreamerDataPacket syncStreamerDataPacket = ConfigManager.CREDENTIALS.streamers.stream().

@@ -1,6 +1,6 @@
 package net.programmer.igoodie.twitchspawn.tracer.socket;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
@@ -64,7 +64,7 @@ public class TwitchEventSubTracer extends WebSocketTracer
 
                     if (player != null)
                     {
-                        player.sendMessage(new TranslatableComponent("errors.twitchspawn.invalid_token"), player.getUUID());
+                        player.sendSystemMessage(Component.translatable("errors.twitchspawn.invalid_token"));
                     }
                 }
 

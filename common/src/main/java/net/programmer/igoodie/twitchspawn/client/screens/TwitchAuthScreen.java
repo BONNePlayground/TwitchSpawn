@@ -15,8 +15,6 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.programmer.igoodie.twitchspawn.configuration.ConfigManager;
 import net.programmer.igoodie.twitchspawn.configuration.CredentialsConfig;
 import net.programmer.igoodie.twitchspawn.network.NetworkManager;
@@ -31,7 +29,7 @@ public class TwitchAuthScreen extends Screen
 {
     public TwitchAuthScreen()
     {
-        super(new TranslatableComponent("gui.twitchspawn.auth_screen_title"));
+        super(Component.translatable("gui.twitchspawn.auth_screen_title"));
         this.twitchApiClient = new TwitchApiClient();
         this.eventCheckboxes = new ArrayList<>();
     }
@@ -51,7 +49,7 @@ public class TwitchAuthScreen extends Screen
         // Connect button positioned below checkboxes
         int buttonY = this.height / 2 + 80;
         this.authorizeButton = new Button(this.width / 2 - 100, buttonY, 200, 20,
-            new TranslatableComponent(this.currentState != AuthState.CONNECTED ?
+            Component.translatable(this.currentState != AuthState.CONNECTED ?
                 "gui.twitchspawn.auth_button" : "gui.twitchspawn.disconnect_button"),
             button ->
             {
@@ -90,7 +88,7 @@ public class TwitchAuthScreen extends Screen
 
             ScopeCheckbox checkbox = new ScopeCheckbox(
                 x, y, checkboxWidth, checkboxHeight,
-                new TranslatableComponent(eventInfo.description),
+                Component.translatable(eventInfo.description),
                 eventInfo.eventType,
                 eventInfo.requiredScopes,
                 eventInfo.defaultSelected
@@ -148,11 +146,11 @@ public class TwitchAuthScreen extends Screen
         drawCenteredString(poseStack, font, this.title, this.width / 2, 20, 0xFFFFFF);
 
         // Event selection header
-        Component eventHeader = new TranslatableComponent("gui.twitchspawn.choose_events");
+        Component eventHeader = Component.translatable("gui.twitchspawn.choose_events");
         drawCenteredString(poseStack, font, eventHeader, this.width / 2, this.height / 2 - 120, 0xCCCCCC);
 
         // Status message
-        if (!this.statusMessage.getContents().isEmpty())
+        if (!this.statusMessage.getString().isEmpty())
         {
             int statusY = this.height / 2 + 120;
             drawCenteredString(poseStack, font, this.statusMessage, this.width / 2, statusY,
@@ -162,7 +160,7 @@ public class TwitchAuthScreen extends Screen
         // User code display
         if (this.currentState == AuthState.WAITING_FOR_USER && this.userCode != null)
         {
-            Component codeText = new TranslatableComponent("gui.twitchspawn.enter_code", this.userCode);
+            Component codeText = Component.translatable("gui.twitchspawn.enter_code", this.userCode);
             drawCenteredString(poseStack, font, codeText, this.width / 2, this.height / 2 + 140, 0xFFFF55);
         }
 
@@ -173,10 +171,10 @@ public class TwitchAuthScreen extends Screen
     private void disconnect()
     {
         this.currentState = AuthState.READY;
-        this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_disconnected");
+        this.statusMessage = Component.translatable("gui.twitchspawn.status_disconnected");
 
         // Reset button
-        this.authorizeButton.setMessage(new TranslatableComponent("gui.twitchspawn.auth_button"));
+        this.authorizeButton.setMessage(Component.translatable("gui.twitchspawn.auth_button"));
         this.authorizeButton.active = true;
 
         this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.active = true);
@@ -215,13 +213,13 @@ public class TwitchAuthScreen extends Screen
 
         if (selectedEvents.isEmpty())
         {
-            this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_select_event");
+            this.statusMessage = Component.translatable("gui.twitchspawn.status_select_event");
             return;
         }
 
         this.currentState = AuthState.LOADING;
         this.authorizeButton.active = false;
-        this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_connecting");
+        this.statusMessage = Component.translatable("gui.twitchspawn.status_connecting");
 
         CompletableFuture.runAsync(() ->
         {
@@ -236,9 +234,9 @@ public class TwitchAuthScreen extends Screen
                 this.interval = authResponse.interval();
 
                 this.currentState = AuthState.WAITING_FOR_USER;
-                this.authorizeButton.setMessage(new TranslatableComponent("gui.twitchspawn.open_browser_button"));
+                this.authorizeButton.setMessage(Component.translatable("gui.twitchspawn.open_browser_button"));
                 this.authorizeButton.active = true;
-                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_click_browser");
+                this.statusMessage = Component.translatable("gui.twitchspawn.status_click_browser");
 
                 this.startPolling();
             }
@@ -247,9 +245,9 @@ public class TwitchAuthScreen extends Screen
                 this.eventCheckboxes.forEach(scopeCheckbox -> scopeCheckbox.active = true);
 
                 this.currentState = AuthState.ERROR;
-                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_error", e.getMessage());
+                this.statusMessage = Component.translatable("gui.twitchspawn.status_error", e.getMessage());
                 this.authorizeButton.active = true;
-                this.authorizeButton.setMessage(new TranslatableComponent("gui.twitchspawn.retry_button"));
+                this.authorizeButton.setMessage(Component.translatable("gui.twitchspawn.retry_button"));
             }
         });
     }
@@ -313,8 +311,8 @@ public class TwitchAuthScreen extends Screen
                             this.getSelectedEvents());
 
                         this.currentState = AuthState.SUCCESS;
-                        this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_authorized");
-                        this.authorizeButton.setMessage(new TranslatableComponent("gui.twitchspawn.connected_button"));
+                        this.statusMessage = Component.translatable("gui.twitchspawn.status_authorized");
+                        this.authorizeButton.setMessage(Component.translatable("gui.twitchspawn.connected_button"));
                         this.authorizeButton.active = false;
                         break;
                     }
@@ -329,17 +327,17 @@ public class TwitchAuthScreen extends Screen
                             case "expired_token" ->
                             {
                                 this.currentState = AuthState.ERROR;
-                                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_expired_token");
+                                this.statusMessage = Component.translatable("gui.twitchspawn.status_expired_token");
                             }
                             case "access_denied" ->
                             {
                                 this.currentState = AuthState.ERROR;
-                                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_denied");
+                                this.statusMessage = Component.translatable("gui.twitchspawn.status_denied");
                             }
                             default ->
                             {
                                 this.currentState = AuthState.ERROR;
-                                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_failed", tokenResponse.error());
+                                this.statusMessage = Component.translatable("gui.twitchspawn.status_failed", tokenResponse.error());
                             }
                         }
                     }
@@ -352,7 +350,7 @@ public class TwitchAuthScreen extends Screen
                 catch (Exception e)
                 {
                     this.currentState = AuthState.ERROR;
-                    this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_polling_error", e.getMessage());
+                    this.statusMessage = Component.translatable("gui.twitchspawn.status_polling_error", e.getMessage());
                     break;
                 }
             }
@@ -360,7 +358,7 @@ public class TwitchAuthScreen extends Screen
             if (this.currentState == AuthState.WAITING_FOR_USER)
             {
                 this.currentState = AuthState.ERROR;
-                this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_timeout");
+                this.statusMessage = Component.translatable("gui.twitchspawn.status_timeout");
             }
         });
     }
@@ -383,11 +381,11 @@ public class TwitchAuthScreen extends Screen
         try
         {
             Util.getPlatform().openUri(url);
-            this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_open_browser");
+            this.statusMessage = Component.translatable("gui.twitchspawn.status_open_browser");
         }
         catch (Exception e)
         {
-            this.statusMessage = new TranslatableComponent("gui.twitchspawn.status_failed_to_open", url);
+            this.statusMessage = Component.translatable("gui.twitchspawn.status_failed_to_open", url);
         }
     }
 
@@ -483,7 +481,7 @@ public class TwitchAuthScreen extends Screen
 
     private AuthState currentState = AuthState.READY;
 
-    private Component statusMessage = new TextComponent("");
+    private Component statusMessage = Component.empty();
 
     private CompletableFuture<Void> pollingTask;
 
