@@ -192,7 +192,7 @@ public class TwitchAuthScreen extends Screen
                 }
             });
 
-        NetworkManager.sendToServer(new SyncStreamerDataPacket(
+        NetworkManager.sendToServer(new SyncStreamerDataPacket.C2S(
             Minecraft.getInstance().player.getName().getString(),
             "",
             "",
@@ -365,7 +365,7 @@ public class TwitchAuthScreen extends Screen
     private void saveTokensAndEvents(String accessToken, String refreshToken, List<String> selectedEvents)
     {
         // send token to server
-        NetworkManager.sendToServer(new SyncStreamerDataPacket(
+        NetworkManager.sendToServer(new SyncStreamerDataPacket.C2S(
             Minecraft.getInstance().player.getName().getString(),
             accessToken,
             refreshToken,

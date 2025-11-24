@@ -99,11 +99,11 @@ public class TwitchSpawnCommand {
                 filter(streamer -> streamer.minecraftNick.equalsIgnoreCase(player.getName().getString())).
                 findAny().
                 map(streamer ->
-                    new SyncStreamerDataPacket(player.getName().getString(),
+                    new SyncStreamerDataPacket.S2C(player.getName().getString(),
                         streamer.twitchAccessToken,
                         streamer.twitchRefreshToken,
                         streamer.twitchScopes)).
-                orElse(new SyncStreamerDataPacket(player.getName().getString(),
+                orElse(new SyncStreamerDataPacket.S2C(player.getName().getString(),
                     "",
                     "",
                     ""));

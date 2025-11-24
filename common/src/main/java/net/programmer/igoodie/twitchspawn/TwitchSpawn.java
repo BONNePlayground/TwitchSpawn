@@ -86,8 +86,8 @@ public class TwitchSpawn {
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S,
-            SyncStreamerDataPacket.ID,
-            SyncStreamerDataPacket.STREAM_CODEC,
+            SyncStreamerDataPacket.C2S.ID,
+            SyncStreamerDataPacket.C2S.STREAM_CODEC,
             SyncStreamerDataPacket::handle);
 
         try
@@ -112,7 +112,7 @@ public class TwitchSpawn {
         NetworkManager.registerS2CPayloadType(GlobalChatCooldownPacket.ID, GlobalChatCooldownPacket.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(OsRunPacket.ID, OsRunPacket.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(StatusChangedPacket.ID, StatusChangedPacket.STREAM_CODEC);
-        NetworkManager.registerS2CPayloadType(SyncStreamerDataPacket.ID, SyncStreamerDataPacket.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(SyncStreamerDataPacket.S2C.ID, SyncStreamerDataPacket.S2C.STREAM_CODEC);
 
         // Do stuff on player joining the server.
         PlayerEvent.PLAYER_JOIN.register(player ->
