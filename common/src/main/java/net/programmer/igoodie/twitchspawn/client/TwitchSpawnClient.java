@@ -58,8 +58,8 @@ public class TwitchSpawnClient
             StatusChangedPacket::handle);
 
         NetworkManager.registerReceiver(NetworkManager.Side.S2C,
-            SyncStreamerDataPacket.ID,
-            SyncStreamerDataPacket.STREAM_CODEC,
+            SyncStreamerDataPacket.S2C.ID,
+            SyncStreamerDataPacket.S2C.STREAM_CODEC,
             SyncStreamerDataPacket::handle);
     }
 
