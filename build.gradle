@@ -56,27 +56,3 @@ subprojects {
     }
 }
 
-
-githubRelease {
-    token = project.findProperty('github.token') ?: System.getenv('GITHUB_TOKEN')
-    owner = 'BONNePlayground'
-    repo = 'TwitchSpawn'
-    tagName = "${project.version}-${rootProject.minecraft_version}"
-    targetCommitish = "architectury-${rootProject.minecraft_version}"
-    releaseName = "${rootProject.archives_name} for ${rootProject.minecraft_version} v${project.version}"
-    body = {
-        def changelogFile = file('CHANGELOG_LATEST.md')
-        if (changelogFile.exists()) {
-            return changelogFile.text
-        } else {
-            return "Release ${project.version}"
-        }
-    }
-    releaseAssets = [
-            files("fabric/build/libs/${rootProject.archives_name}-fabric-${rootProject.minecraft_version}-${project.version}.jar"),
-            files("neoforge/build/libs/${rootProject.archives_name}-neoforge-${rootProject.minecraft_version}-${project.version}.jar")
-    ]
-
-    draft = true
-    prerelease = false
-}

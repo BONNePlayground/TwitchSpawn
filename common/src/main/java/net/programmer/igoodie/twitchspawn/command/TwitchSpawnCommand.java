@@ -32,10 +32,7 @@ import net.programmer.igoodie.twitchspawn.tslanguage.parser.TSLSyntaxError;
 import net.programmer.igoodie.twitchspawn.tslanguage.parser.TSLTokenizer;
 import net.programmer.igoodie.twitchspawn.util.MCPHelpers;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class TwitchSpawnCommand {
@@ -110,9 +107,8 @@ public class TwitchSpawnCommand {
 
             NetworkManager.sendToPlayer(player, syncStreamerDataPacket);
         }
-        catch (CommandSyntaxException e)
-        {
-            TwitchSpawn.LOGGER.error("AUTH is available only for players.");
+        catch (CommandSyntaxException e) {
+            TwitchSpawn.LOGGER.error("AUTH is available only for players.", e);
             return 0;
         }
 
@@ -131,8 +127,6 @@ public class TwitchSpawnCommand {
 
     public static int startModule(CommandContext<CommandSourceStack> context) {
         String sourceNickname = context.getSource().getTextName();
-
-        // If has no permission
         if (!ConfigManager.CREDENTIALS.hasPermission(sourceNickname)) {
             context.getSource().sendSuccess(() -> Component.translatable(
                     "commands.twitchspawn.start.no_perm"), true);
@@ -153,8 +147,6 @@ public class TwitchSpawnCommand {
 
     public static int stopModule(CommandContext<CommandSourceStack> context) {
         String sourceNickname = context.getSource().getTextName();
-
-        // If has no permission
         if (!ConfigManager.CREDENTIALS.hasPermission(sourceNickname)) {
             context.getSource().sendSuccess(() -> Component.translatable(
                     "commands.twitchspawn.stop.no_perm"), true);
@@ -179,9 +171,8 @@ public class TwitchSpawnCommand {
 
         boolean isOp = TwitchSpawn.SERVER.isSingleplayer()
                 || Stream.of(TwitchSpawn.SERVER.getPlayerList().getOpNames())
-                .anyMatch(oppedPlayerName -> oppedPlayerName.equalsIgnoreCase(sourceNickname));
+                .anyMatch(op -> op.equalsIgnoreCase(sourceNickname));
 
-        // If is not OP or has no permission
         if (!isOp && !ConfigManager.CREDENTIALS.hasPermission(sourceNickname)) {
             context.getSource().sendSuccess(() -> Component.translatable(
                     "commands.twitchspawn.reloadcfg.no_perm"), true);
@@ -260,8 +251,6 @@ public class TwitchSpawnCommand {
         try {
             String sourceName = context.getSource().getTextName();
             String streamerName = streamerNick != null ? streamerNick : sourceName;
-
-            // If has no permission
             if (!ConfigManager.CREDENTIALS.hasPermission(sourceName)) {
                 context.getSource().sendSuccess(() -> Component.translatable(
                         "commands.twitchspawn.simulate.no_perm"), true);
@@ -311,11 +300,11 @@ public class TwitchSpawnCommand {
             ConfigManager.RULESET_COLLECTION.handleEvent(simulatedEvent);
 
             context.getSource().sendSuccess(() -> Component.translatable(
-                    "commands.twitchspawn.simulate.success", nbt), true);
+                    "commands.twitchspawn.simulate.success", nbt.toString()), true);
 
             return 1;
         } catch (Exception e) {
-            e.printStackTrace();
+            TwitchSpawn.LOGGER.error("Caught exception while simulating event", e);
             return 0;
         }
     }
@@ -325,7 +314,7 @@ public class TwitchSpawnCommand {
             String words = TSLWordsArgumentType.getWords(context, "tsl_action");
 
             List<String> wordTokens = TSLTokenizer.intoWords(words);
-            String actionName = wordTokens.remove(0);
+            String actionName = wordTokens.removeFirst();
 
             TSLAction tslAction = TSLParser.parseAction(actionName, wordTokens);
             EventArguments eventArguments = EventArguments.createRandom(context.getSource().getTextName());
@@ -361,7 +350,7 @@ public class TwitchSpawnCommand {
         while (eventIterator.hasNext()) {
             event = eventIterator.next();
 
-            TSLEventPair eventPair = TSLEventKeyword.toPairs(event.getName()).iterator().next();
+            TSLEventPair eventPair = Objects.requireNonNull(TSLEventKeyword.toPairs(event.getName())).iterator().next();
             EventArguments eventArguments = new EventArguments(eventPair);
             eventArguments.randomize();
             eventArguments.streamerNickname = streamerPlayer.getName().getString();
